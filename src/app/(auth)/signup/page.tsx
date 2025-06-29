@@ -13,8 +13,17 @@ import {
   Calendar,
 } from "lucide-react";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { SingUp } from "@/store/slices/AuthSlice";
+import { toast } from "react-toastify";
+import { useRedirectIfAuthenticated } from "@/lib/redirectAuthenciated";
 
 const SignUpPage = () => {
+  useRedirectIfAuthenticated();
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -33,19 +42,24 @@ const SignUpPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sign up data:", formData);
-    // Mock registration
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      role: "",
-      parentEmail: "",
-      phone: "",
-      experienceYears: "",
-    });
+    const res = await dispatch(SingUp(formData));
+    if (res?.success) {
+      toast.success(res.message);
+      router.push("/signin");
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        role: "",
+        parentEmail: "",
+        phone: "",
+        experienceYears: "",
+      });
+    } else {
+      toast.error(res?.message);
+    }
   };
 
   const roles = [

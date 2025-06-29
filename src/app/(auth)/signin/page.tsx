@@ -3,8 +3,17 @@
 import React, { useState } from "react";
 import { Play, Mail, Lock, Eye, EyeOff, UserCheck } from "lucide-react";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { Login } from "@/store/slices/AuthSlice";
+import { toast } from "react-toastify";
+import { useRedirectIfAuthenticated } from "@/lib/redirectAuthenciated";
 
 const SignInPage = () => {
+  useRedirectIfAuthenticated();
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -19,11 +28,15 @@ const SignInPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sign in data:", formData);
-    // Mock authentication
-    // onSignIn({ name: "John Doe", email: formData.email, role: formData.role });
+    const res = await dispatch(Login(formData));
+    if (res?.success) {
+      toast.success(res?.message);
+      router.push("/home");
+    } else {
+      toast.error(res?.message);
+    }
     setFormData({ email: "", password: "", role: "" });
   };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Play,
   Zap,
@@ -8,15 +8,27 @@ import {
   Users,
   ArrowRight,
   CheckCircle,
+  User,
+  Settings,
+  ChevronDown,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
-// import { useRouter } from "next/router";
+import { logoutUser, RootState } from "@/store/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function QuizLandingPage() {
+  const dispatch = useDispatch();
+
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
-  //   const router = useRouter();
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
 
   useEffect(() => {
     setIsVisible(true);
@@ -24,6 +36,20 @@ export default function QuizLandingPage() {
       setActiveFeature((prev) => (prev + 1) % 3);
     }, 3000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const features = [
@@ -47,6 +73,36 @@ export default function QuizLandingPage() {
     },
   ];
 
+  const getUserInitial = () => {
+    if (user?.name) {
+      return user.name.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowUserDropdown(false); // Close dropdown immediately
+    try {
+      const res = await dispatch(logoutUser());
+      console.log(res);
+      if (res.success) {
+        toast.success(res.message);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  const handleUpdateProfile = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowUserDropdown(false); // Close dropdown
+    // Add your update profile logic here
+    console.log("Update profile clicked");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
       {/* Animated background elements */}
@@ -66,12 +122,76 @@ export default function QuizLandingPage() {
             QuizMaster
           </span>
         </div>
-        <Link
-          href={"/signin"}
-          className="px-6 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20"
-        >
-          Sign In
-        </Link>
+
+        {isAuthenticated ? (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setShowUserDropdown(!showUserDropdown)}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20"
+            >
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                {getUserInitial()}
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  showUserDropdown ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* User Dropdown */}
+            {showUserDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-64 sm:w-72 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-hidden z-50">
+                <div className="p-4 border-b border-white/10">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {getUserInitial()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold truncate">
+                        {user?.name || "User"}
+                      </p>
+                      <p className="text-gray-300 text-sm truncate">
+                        {user?.email || "user@example.com"}
+                      </p>
+                      <p className="text-gray-400 text-xs capitalize">
+                        {user?.role || "Member"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-2">
+                  <button
+                    onClick={handleUpdateProfile}
+                    className="w-full flex items-center space-x-3 px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-all duration-200 group"
+                  >
+                    <Settings className="w-4 h-4 text-gray-400 group-hover:text-white" />
+                    <span className="text-gray-300 group-hover:text-white">
+                      Update Profile
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center space-x-3 px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-all duration-200 group"
+                  >
+                    <LogOut className="w-4 h-4 text-gray-400 group-hover:text-white" />
+                    <span className="text-gray-300 group-hover:text-white">
+                      Logout
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link
+            href={"/signin"}
+            className="px-6 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20"
+          >
+            Sign In
+          </Link>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -101,10 +221,13 @@ export default function QuizLandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <button className="group px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl font-bold text-lg hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-pink-500/25 flex items-center space-x-2">
-                <Link href={"/home"}>Start Quiz</Link>
+              <Link
+                href={"/home"}
+                className="group px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl font-bold text-lg hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-pink-500/25 flex items-center space-x-2"
+              >
+                <span>Start Quiz</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
+              </Link>
               <button className="px-8 py-4 bg-white/10 backdrop-blur-md rounded-2xl font-bold text-lg hover:bg-white/20 transition-all duration-300 border border-white/20">
                 Learn More
               </button>
@@ -235,10 +358,13 @@ export default function QuizLandingPage() {
             Join thousands of quiz enthusiasts and start your journey to
             becoming a quiz master today.
           </p>
-          <button className="group px-12 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl font-bold text-xl hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-pink-500/25 flex items-center space-x-3 mx-auto">
-            <Link href={"/home"}>Get Started Now</Link>
+          <Link
+            href={"/home"}
+            className="group px-12 py-4 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl font-bold text-xl hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-pink-500/25 flex items-center space-x-3 mx-auto"
+          >
+            <span>Get Started Now</span>
             <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
-          </button>
+          </Link>
         </div>
       </div>
 
