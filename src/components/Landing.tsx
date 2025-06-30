@@ -12,18 +12,25 @@ import {
   Settings,
   ChevronDown,
   LogOut,
+  SwitchCamera,
 } from "lucide-react";
 import Link from "next/link";
 import { logoutUser, RootState } from "@/store/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import swap from "@/assests/swap.png";
 
 export default function QuizLandingPage() {
   const dispatch = useDispatch();
+  const router = useRouter();
 
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true); // Start with true to match server
   const [activeFeature, setActiveFeature] = useState(0);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef(null);
 
   const { isAuthenticated, user } = useSelector(
@@ -31,26 +38,32 @@ export default function QuizLandingPage() {
   );
 
   useEffect(() => {
-    setIsVisible(true);
+    setIsClient(true);
+    setIsMounted(true);
     const interval = setInterval(() => {
       setActiveFeature((prev) => (prev + 1) % 3);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
+    if (!isMounted) return;
+
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowUserDropdown(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    // Use capture phase to handle clicks properly
+    document.addEventListener("mousedown", handleClickOutside, true);
+    document.addEventListener("touchstart", handleClickOutside, true);
+
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside, true);
+      document.removeEventListener("touchstart", handleClickOutside, true);
     };
-  }, []);
+  }, [isMounted]);
 
   const features = [
     {
@@ -97,10 +110,17 @@ export default function QuizLandingPage() {
 
   const handleUpdateProfile = (e) => {
     e.preventDefault();
-    e.stopPropagation();
+
     setShowUserDropdown(false); // Close dropdown
     // Add your update profile logic here
     console.log("Update profile clicked");
+  };
+
+  const handleSwitchAccount = (e) => {
+    e.preventDefault();
+
+    setShowUserDropdown(false); // Close dropdown
+    router.push("/switch-account");
   };
 
   return (
@@ -140,7 +160,7 @@ export default function QuizLandingPage() {
             </button>
 
             {/* User Dropdown */}
-            {showUserDropdown && (
+            {isMounted && showUserDropdown && (
               <div className="absolute right-0 top-full mt-2 w-64 sm:w-72 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl overflow-hidden z-50">
                 <div className="p-4 border-b border-white/10">
                   <div className="flex items-center space-x-3">
@@ -163,19 +183,40 @@ export default function QuizLandingPage() {
 
                 <div className="p-2">
                   <button
+                    type="button"
                     onClick={handleUpdateProfile}
-                    className="w-full flex items-center space-x-3 px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-all duration-200 group"
+                    className="w-full flex items-center space-x-3 px-3 py-3 hover:bg-white/10 rounded-lg transition-all duration-200 group cursor-pointer text-left focus:outline-none"
                   >
-                    <Settings className="w-4 h-4 text-gray-400 group-hover:text-white" />
+                    <Settings className="w-4 h-4 text-gray-400 group-hover:text-white flex-shrink-0" />
                     <span className="text-gray-300 group-hover:text-white">
                       Update Profile
                     </span>
                   </button>
+
                   <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center space-x-3 px-3 py-3 text-left hover:bg-white/10 rounded-lg transition-all duration-200 group"
+                    type="button"
+                    onClick={handleSwitchAccount}
+                    className="w-full flex items-center space-x-3 px-3 py-3 hover:bg-white/10 rounded-lg transition-all duration-200 group cursor-pointer text-left focus:outline-none"
                   >
-                    <LogOut className="w-4 h-4 text-gray-400 group-hover:text-white" />
+                    <Image
+                      src={swap}
+                      alt="Icon"
+                      width={16}
+                      height={16}
+                      className="text-gray-300 group-hover:text-white flex-shrink-0"
+                    />
+
+                    <span className="text-gray-300 group-hover:text-white">
+                      Switch Account
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full flex items-center space-x-3 px-3 py-3 hover:bg-white/10 rounded-lg transition-all duration-200 group cursor-pointer text-left focus:outline-none"
+                  >
+                    <LogOut className="w-4 h-4 text-gray-400 group-hover:text-white flex-shrink-0" />
                     <span className="text-gray-300 group-hover:text-white">
                       Logout
                     </span>
@@ -199,9 +240,9 @@ export default function QuizLandingPage() {
         <div className="text-center max-w-4xl mx-auto">
           <div
             className={`transform transition-all duration-1000 ${
-              isVisible
+              isClient
                 ? "translate-y-0 opacity-100"
-                : "translate-y-10 opacity-0"
+                : "translate-y-0 opacity-100"
             }`}
           >
             <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
@@ -237,9 +278,9 @@ export default function QuizLandingPage() {
           {/* Hero Illustration */}
           <div
             className={`transform transition-all duration-1000 delay-500 ${
-              isVisible
+              isClient
                 ? "translate-y-0 opacity-100"
-                : "translate-y-10 opacity-0"
+                : "translate-y-0 opacity-100"
             }`}
           >
             <div className="relative mx-auto w-full max-w-lg">

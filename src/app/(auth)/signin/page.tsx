@@ -30,14 +30,21 @@ const SignInPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await dispatch(Login(formData));
-    if (res?.success) {
-      toast.success(res?.message);
-      router.push("/home");
-    } else {
-      toast.error(res?.message);
+    try {
+      const res = await dispatch(Login(formData));
+      if (res?.success) {
+        toast.success(res?.message);
+        router.push("/");
+      } else {
+        toast.error(
+          res?.message || "Login failed. Please check your credentials."
+        );
+      }
+      setFormData({ email: "", password: "", role: "" });
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("something went wrong");
     }
-    setFormData({ email: "", password: "", role: "" });
   };
 
   const roles = [

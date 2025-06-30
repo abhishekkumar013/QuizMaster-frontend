@@ -77,7 +77,8 @@ export const SingUp = (formData: any) => async (dispatch: any) => {
     const res = await axios.post("/auth/users/signup", formData);
     return res.data;
   } catch (error) {
-    return null;
+    // console.error("Error during signup:", error);
+    return error.response?.data || null;
   }
 };
 
@@ -100,8 +101,9 @@ export const Login = (formData: any) => async (dispatch: any) => {
       return null;
     }
   } catch (error) {
+    // console.error("Error during login:", error.response?.data);
     dispatch(loginFailed());
-    return null;
+    return error.response?.data || null;
   }
 };
 
@@ -115,6 +117,29 @@ export const logoutUser = () => async (dispatch) => {
     }
     return res.data;
   } catch (error) {
-    return null;
+    return error.response?.data || null;
+  }
+};
+
+export const switchAccont = (formData: any) => async (dispatch: any) => {
+  try {
+    const res = await axios.post("/auth/users/switch-role", formData);
+    console.log("Switch Account Response:", res);
+
+    if (res.data.success) {
+      const user = res.data.data;
+
+      dispatch(
+        updateProfile({
+          user: user,
+        })
+      );
+      return res.data;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error during switch account:", error);
+    return error.response?.data || null;
   }
 };
