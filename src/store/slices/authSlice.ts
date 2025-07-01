@@ -10,12 +10,14 @@ type AuthState = {
   isAuthenticated: boolean;
   user: object | null;
   token: string | null;
+  loading: boolean;
 };
 
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
   token: null,
+  loading: true,
 };
 
 const authSlice = createSlice({
@@ -27,33 +29,43 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.token = action.payload.token ?? null;
+      state.loading = false;
     },
     loginFailed(state) {
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
+      state.loading = false;
     },
     logout(state) {
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
+      state.loading = false;
     },
     updateProfile(state, action: PayloadAction<AuthPayload>) {
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.token = action.payload.token ?? state.token;
+      state.loading = false;
+    },
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
     },
   },
 });
 
-export const { loginSuccess, loginFailed, logout, updateProfile } =
+export const { loginSuccess, loginFailed, logout, updateProfile, setLoading } =
   authSlice.actions;
 
 export default authSlice.reducer;
 
 export const CheckLoginStatus = () => async (dispatch: any) => {
+  dispatch(setLoading(true));
+
   try {
     const res = await axios.get("/auth/user/isauthenticated");
+    console.log("CheckLoginStatus Response:", res);
 
     if (res.data.success) {
       const { token, ...userWithoutToken } = res.data.data;
@@ -69,6 +81,8 @@ export const CheckLoginStatus = () => async (dispatch: any) => {
     }
   } catch (error) {
     dispatch(loginFailed());
+  } finally {
+    dispatch(setLoading(false));
   }
 };
 

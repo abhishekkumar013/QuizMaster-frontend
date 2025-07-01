@@ -1,10 +1,10 @@
-// app/ClientLayout.tsx
 "use client";
 
 import { Provider } from "react-redux";
 import { store } from "@/store/slice";
 import { ToastContainer } from "react-toastify";
 import { AppInitializer } from "@/lib/AuthStatus";
+import AuthGuard from "@/lib/AuthGuard";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function ClientLayout({
@@ -15,7 +15,7 @@ export default function ClientLayout({
   return (
     <Provider store={store}>
       <AppInitializer />
-      {children}
+      <AuthGuard>{children}</AuthGuard>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </Provider>
   );
