@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { RootState } from "@/store/slices/authSlice";
+import Loading from "@/components/Loading";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -22,11 +23,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, pathname, loading]);
 
   if (loading && !publicRoutes.includes(pathname)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Checking authentication...
-      </div>
-    );
+    return <Loading />;
   }
 
   return children;
