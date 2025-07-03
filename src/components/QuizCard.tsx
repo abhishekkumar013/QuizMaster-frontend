@@ -10,6 +10,7 @@ import {
   BookOpen,
   Calendar,
   Clock,
+  CloudUpload,
   Globe,
   Lock,
   Play,
@@ -21,9 +22,11 @@ import Link from "next/link";
 export const QuizCard = ({
   quiz,
   isPrivate = false,
+  role = "STUDENT",
 }: {
   quiz: Quiz;
   isPrivate?: boolean;
+  role?: String;
 }) => {
   const isActive = isQuizActive(quiz.startTime, quiz.endTime);
 
@@ -114,27 +117,41 @@ export const QuizCard = ({
           <span>{isActive ? "Live Now" : "Not Active"}</span>
         </div>
 
-        <Link
-          href={`/quiz/${quiz.title.toLowerCase().replace(/\s+/g, "-")}/${
-            quiz.id
-          }`}
-          className={`group/btn flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
-            isActive
-              ? "bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white"
-              : "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-          }`}
-          onClick={(e) => {
-            if (!isActive) {
-              e.preventDefault();
-            }
-          }}
-        >
-          <Play className="w-4 h-4" />
-          <span>Start Quiz</span>
-          {isActive && (
+        {role === "TEACHER" ? (
+          <Link
+            href={`/quiz/${quiz.title.toLowerCase().replace(/\s+/g, "-")}/${
+              quiz.id
+            }`}
+            className="group/btn flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 
+              bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white"
+          >
+            <CloudUpload className="w-4 h-4" />
+            <span>Update</span>
             <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-          )}
-        </Link>
+          </Link>
+        ) : (
+          <Link
+            href={`/quiz/${quiz.title.toLowerCase().replace(/\s+/g, "-")}/${
+              quiz.id
+            }`}
+            className={`group/btn flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+              isActive
+                ? "bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white"
+                : "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+            }`}
+            onClick={(e) => {
+              if (!isActive) {
+                e.preventDefault();
+              }
+            }}
+          >
+            <Play className="w-4 h-4" />
+            <span>Start Quiz</span>
+            {isActive && (
+              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+            )}
+          </Link>
+        )}
       </div>
     </div>
   );

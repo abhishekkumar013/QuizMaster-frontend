@@ -19,9 +19,29 @@ import {
   DeleteIcon,
   Trash,
 } from "lucide-react";
+import axios from "@/lib/axios";
 import { toast } from "react-toastify";
+import { RootState } from "@/store";
+import { GetCategory } from "@/store/slices/categorySlice";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function CreateQuizPage() {
+  const dispatch = useDispatch();
+
+  // Mock categories for demonstration
+  const categoryState = useSelector((state: RootState) => state.category);
+  const { category } = categoryState;
+
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    dispatch(GetCategory());
+  }, [dispatch]);
+
+  useEffect(() => {
+    setCategories(category);
+  }, [category]);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -54,15 +74,6 @@ export default function CreateQuizPage() {
     },
   ]);
 
-  const [categories] = useState([
-    { id: 1, name: "Science", icon: "🔬" },
-    { id: 2, name: "Mathematics", icon: "📊" },
-    { id: 3, name: "History", icon: "📚" },
-    { id: 4, name: "Geography", icon: "🌍" },
-    { id: 5, name: "Literature", icon: "📖" },
-    { id: 6, name: "Technology", icon: "💻" },
-  ]);
-
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -80,6 +91,7 @@ export default function CreateQuizPage() {
   }, []);
 
   const handleInputChange = (field, value) => {
+    console.log(field, "-", value);
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -140,6 +152,7 @@ export default function CreateQuizPage() {
       )
     );
   };
+
   const setCorrectAnswer = (questionId, optionIndex) => {
     setQuestions(
       questions.map((q) =>
@@ -155,6 +168,7 @@ export default function CreateQuizPage() {
       )
     );
   };
+
   const addOption = (questionId) => {
     setQuestions(
       questions.map((q) =>
@@ -170,10 +184,11 @@ export default function CreateQuizPage() {
       )
     );
   };
+
   const removeOption = (questionId, optionIndex) => {
     const ques = questions.find((q) => q.id === questionId);
     if (ques?.options.length === 2) {
-      toast.error("Minimum 2 Options Required");
+      alert("Minimum 2 Options Required");
       return;
     }
     setQuestions(
@@ -193,13 +208,15 @@ export default function CreateQuizPage() {
   const validateForm = () => {
     const newErrors = {};
 
+    // Required field validations matching controller
     if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (!formData.categoryId) newErrors.categoryId = "Category is required";
+    if (!formData.categoryId || formData.categoryId.trim() === "") {
+      newErrors.categoryId = "Category is required";
+    }
+    if (!formData.accessType) newErrors.accessType = "Access type is required";
     if (!formData.startTime) newErrors.startTime = "Start time is required";
     if (!formData.endTime) newErrors.endTime = "End time is required";
-    if (new Date(formData.startTime) >= new Date(formData.endTime)) {
-      newErrors.endTime = "End time must be after start time";
-    }
+    if (!formData.difficulty) newErrors.difficulty = "Difficulty is required";
 
     if (!formData.durationInMinutes || formData.durationInMinutes <= 0) {
       newErrors.durationInMinutes = "Duration must be greater than 0";
@@ -207,7 +224,11 @@ export default function CreateQuizPage() {
     if (!formData.maxAttempts || formData.maxAttempts <= 0) {
       newErrors.maxAttempts = "Max attempts must be greater than 0";
     }
-    if (!formData.difficulty) newErrors.difficulty = "Difficulty is required";
+
+    // Time validation
+    if (new Date(formData.startTime) >= new Date(formData.endTime)) {
+      newErrors.endTime = "End time must be after start time";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -223,37 +244,56 @@ export default function CreateQuizPage() {
     }
 
     questions.forEach((q, index) => {
-      if (!q.text.trim()) {
+      // Question text validation
+      if (!q.text || q.text.trim() === "") {
         newErrors[`question_${q.id}`] = `Question ${
           index + 1
         } text is required`;
       }
 
+      // Score validation
       if (typeof q.score !== "number" || q.score < 0) {
         newErrors[`score_${q.id}`] = `Question ${
           index + 1
         } score must be a non-negative number`;
       }
 
-      const filledOptions = q.options.filter((opt) => opt.text.trim());
-      if (filledOptions.length < 2) {
+      // Order validation
+      if (typeof q.order !== "number" || q.order < 0) {
+        newErrors[`order_${q.id}`] = `Question ${
+          index + 1
+        } order must be a non-negative number`;
+      }
+
+      // Options validation
+      if (!q.options || !Array.isArray(q.options) || q.options.length < 2) {
         newErrors[`options_${q.id}`] = `Question ${
           index + 1
-        } needs at least 2 options`;
-      }
+        } must have at least 2 options`;
+      } else {
+        // Validate each option
+        let hasCorrectAnswer = false;
+        q.options.forEach((option, optIndex) => {
+          if (!option.text || option.text.trim() === "") {
+            newErrors[`option_${q.id}_${optIndex}`] = `Question ${
+              index + 1
+            }, Option ${optIndex + 1} text is required`;
+          }
+          if (typeof option.isCorrect !== "boolean") {
+            newErrors[`option_correct_${q.id}_${optIndex}`] = `Question ${
+              index + 1
+            }, Option ${optIndex + 1} isCorrect must be a boolean`;
+          }
+          if (option.isCorrect) {
+            hasCorrectAnswer = true;
+          }
+        });
 
-      const hasCorrectAnswer = q.options.some((opt) => opt.isCorrect);
-      if (!hasCorrectAnswer) {
-        newErrors[`correct_${q.id}`] = `Question ${
-          index + 1
-        } must have at least one correct answer`;
-      }
-
-      const correctOption = q.options.find((opt) => opt.isCorrect);
-      if (correctOption && !correctOption.text.trim()) {
-        newErrors[`correct_text_${q.id}`] = `Question ${
-          index + 1
-        } correct answer cannot be empty`;
+        if (!hasCorrectAnswer) {
+          newErrors[`correct_${q.id}`] = `Question ${
+            index + 1
+          } must have at least one correct answer`;
+        }
       }
     });
 
@@ -261,107 +301,47 @@ export default function CreateQuizPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const createQuiz = async (isDraft = false) => {
-    if (!validateQuizDetails()) return null;
-
-    try {
-      // Calculate total marks from questions
-      const totalMarks = questions.reduce((sum, q) => sum + (q.marks || 1), 0);
-
-      const quizPayload = {
-        ...formData,
-        totalMarks,
-        status: isDraft ? "DRAFT" : "PUBLISHED",
-        categoryId: parseInt(formData.categoryId),
-        createdById: parseInt(formData.createdById),
-      };
-
-      console.log("Creating quiz with payload:", quizPayload);
-
-      // Here you would make the API call to create quiz
-      // const response = await fetch('/api/quiz/create', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(quizPayload)
-      // });
-
-      // Simulate API response
-      const mockQuizResponse = {
-        id: Math.floor(Math.random() * 1000),
-        ...quizPayload,
-        createdAt: new Date().toISOString(),
-      };
-
-      return mockQuizResponse;
-    } catch (error) {
-      console.error("Error creating quiz:", error);
-      throw error;
-    }
-  };
-
-  const addQuestionsToQuiz = async (quizId) => {
-    if (!validateQuestions()) return false;
-
-    try {
-      // Format questions for the API
-      const questionsPayload = questions.map((q) => ({
-        text: q.text.trim(),
-        score: q.score,
-        explanation: q.explanation?.trim() || null,
-        marks: q.marks || 1,
-        order: q.order,
-        isRequired: q.isRequired !== undefined ? q.isRequired : true,
-        options: q.options
-          .filter((opt) => opt.text.trim()) // Only include non-empty options
-          .map((opt, index) => ({
-            text: opt.text.trim(),
-            isCorrect: opt.isCorrect,
-            order: opt.order || index + 1,
-          })),
-      }));
-
-      const payload = {
-        quizId: parseInt(quizId),
-        questions: questionsPayload,
-      };
-
-      console.log("Adding questions with payload:", payload);
-
-      // Here you would make the API call to add questions
-      // const response = await fetch('/api/quiz/add-questions', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(payload)
-      // });
-
-      return true;
-    } catch (error) {
-      console.error("Error adding questions:", error);
-      throw error;
-    }
-  };
-
   const handleSubmit = async (isDraft = false) => {
     setIsSubmitting(true);
 
     try {
+      // Validate form data
       if (!validateForm()) {
         setIsSubmitting(false);
+        toast.error("form not valid");
         return;
       }
 
+      // If not draft, validate questions
       if (!isDraft && !validateQuestions()) {
         setIsSubmitting(false);
+        toast.error("question not valid");
         return;
       }
 
-      const totalMarks = questions.reduce((sum, q) => sum + (q.marks || 1), 0);
+      // Calculate total marks from questions
+      const calculatedTotalMarks = questions.reduce(
+        (sum, q) => sum + (q.marks || 1),
+        0
+      );
 
-      const quizPayload = {
-        ...formData,
-        totalMarks,
+      // Prepare payload matching controller expectations
+      const payload = {
+        // Quiz fields
+        title: formData.title.trim(),
+        description: formData.description?.trim() || null,
+        instructions: formData.instructions?.trim() || null,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        categoryId: formData.categoryId,
+        accessType: formData.accessType,
         status: isDraft ? "DRAFT" : "PUBLISHED",
-        categoryId: parseInt(formData.categoryId),
+        difficulty: formData.difficulty,
+        durationInMinutes: formData.durationInMinutes,
+        totalMarks: calculatedTotalMarks,
+        passingMarks: formData.passingMarks,
+        maxAttempts: formData.maxAttempts,
+        // Questions field
         questions: questions.map((q) => ({
           text: q.text.trim(),
           score: q.score,
@@ -370,7 +350,7 @@ export default function CreateQuizPage() {
           order: q.order,
           isRequired: q.isRequired !== undefined ? q.isRequired : true,
           options: q.options
-            .filter((opt) => opt.text.trim())
+            .filter((opt) => opt.text.trim()) // Only include non-empty options
             .map((opt, index) => ({
               text: opt.text.trim(),
               isCorrect: opt.isCorrect,
@@ -379,16 +359,14 @@ export default function CreateQuizPage() {
         })),
       };
 
-      console.log("Quiz payload:", quizPayload);
-
-      alert(
-        `Quiz ${
-          isDraft ? "saved as draft" : "created and published"
-        } successfully!`
-      );
+      const res = await axios.post("/quiz/create-quiz-question", payload);
+      if (res.data.success) {
+        toast.success(res.data.message);
+      } else {
+        toast.error(res.data.message);
+      }
     } catch (error) {
-      console.error("Error in quiz creation process:", error);
-      alert("Error creating quiz. Please try again.");
+      toast.error(error.response?.data?.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -539,9 +517,10 @@ export default function CreateQuizPage() {
                     </label>
                     <select
                       value={formData.categoryId}
-                      onChange={(e) =>
-                        handleInputChange("categoryId", e.target.value)
-                      }
+                      onChange={(e) => {
+                        handleInputChange("categoryId", e.target.value);
+                        // console.log("e Category ID:", e.target.value);
+                      }}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white"
                     >
                       <option value="">Select a category</option>
@@ -551,7 +530,7 @@ export default function CreateQuizPage() {
                           value={cat.id}
                           className="bg-gray-800"
                         >
-                          {cat.icon} {cat.name}
+                          {cat.name}
                         </option>
                       ))}
                     </select>
@@ -566,7 +545,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label className="block text-sm font-semibold text-gray-300 mb-2">
                         <Clock className="w-4 h-4 inline mr-1" />
-                        Duration (minutes)
+                        Duration (minutes) *
                       </label>
                       <input
                         type="number"
@@ -574,17 +553,22 @@ export default function CreateQuizPage() {
                         onChange={(e) =>
                           handleInputChange(
                             "durationInMinutes",
-                            parseInt(e.target.value)
+                            parseInt(e.target.value) || 0
                           )
                         }
                         min="1"
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white"
                       />
+                      {errors.durationInMinutes && (
+                        <p className="text-red-400 text-sm mt-1">
+                          {errors.durationInMinutes}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-300 mb-2">
                         <Target className="w-4 h-4 inline mr-1" />
-                        Max Attempts
+                        Max Attempts *
                       </label>
                       <input
                         type="number"
@@ -592,12 +576,17 @@ export default function CreateQuizPage() {
                         onChange={(e) =>
                           handleInputChange(
                             "maxAttempts",
-                            parseInt(e.target.value)
+                            parseInt(e.target.value) || 0
                           )
                         }
                         min="1"
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white"
                       />
+                      {errors.maxAttempts && (
+                        <p className="text-red-400 text-sm mt-1">
+                          {errors.maxAttempts}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -648,7 +637,7 @@ export default function CreateQuizPage() {
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-2">
                       <Users className="w-4 h-4 inline mr-1" />
-                      Access Type
+                      Access Type *
                     </label>
                     <select
                       value={formData.accessType}
@@ -664,12 +653,17 @@ export default function CreateQuizPage() {
                         Private - Invite only
                       </option>
                     </select>
+                    {errors.accessType && (
+                      <p className="text-red-400 text-sm mt-1">
+                        {errors.accessType}
+                      </p>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-2">
                       <Trophy className="w-4 h-4 inline mr-1" />
-                      Difficulty Level
+                      Difficulty Level *
                     </label>
                     <select
                       value={formData.difficulty}
@@ -688,6 +682,11 @@ export default function CreateQuizPage() {
                         🔴 Hard
                       </option>
                     </select>
+                    {errors.difficulty && (
+                      <p className="text-red-400 text-sm mt-1">
+                        {errors.difficulty}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -700,7 +699,7 @@ export default function CreateQuizPage() {
                       onChange={(e) =>
                         handleInputChange(
                           "passingMarks",
-                          parseInt(e.target.value)
+                          parseInt(e.target.value) || 0
                         )
                       }
                       min="0"
@@ -739,7 +738,6 @@ export default function CreateQuizPage() {
           </div>
         )}
 
-        {/* Step 2: Questions */}
         {currentStep === 2 && (
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-8">
@@ -782,17 +780,13 @@ export default function CreateQuizPage() {
                         Question Text *
                       </label>
                       <textarea
-                        value={question.question}
+                        value={question.text}
                         onChange={(e) =>
-                          updateQuestion(
-                            question.id,
-                            "question",
-                            e.target.value
-                          )
+                          updateQuestion(question.id, "text", e.target.value)
                         }
                         rows={3}
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 resize-none"
-                        placeholder="Enter your question here..."
+                        placeholder="Enter your question"
                       />
                       {errors[`question_${question.id}`] && (
                         <p className="text-red-400 text-sm mt-1">
@@ -800,78 +794,34 @@ export default function CreateQuizPage() {
                         </p>
                       )}
                     </div>
-                    <div>
-                      <div className="flex justify-between items-center mb-4">
-                        <label className="block text-sm font-semibold text-gray-300">
-                          Answer Options * (Select the correct answer)
-                        </label>
-                        <button
-                          onClick={() => addOption(question.id)}
-                          className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-1.5"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add Option</span>
-                        </button>
-                      </div>
 
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {question.options.map((option, optionIndex) => (
-                          <div
-                            key={optionIndex}
-                            className="flex items-center space-x-3"
-                          >
-                            <input
-                              type="radio"
-                              name={`correct_${question.id}`}
-                              checked={question.correctAnswer === optionIndex}
-                              onChange={() =>
-                                updateQuestion(
-                                  question.id,
-                                  "correctAnswer",
-                                  optionIndex
-                                )
-                              }
-                              className="w-4 h-4 text-cyan-400 border-white/20 focus:ring-cyan-400 focus:ring-2"
-                            />
-                            <input
-                              type="text"
-                              value={option.text}
-                              onChange={(e) =>
-                                updateOption(
-                                  question.id,
-                                  optionIndex,
-                                  e.target.value
-                                )
-                              }
-                              className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400"
-                              placeholder={`Option ${optionIndex + 1}`}
-                            />
-                            <button
-                              onClick={() =>
-                                removeOption(question.id, optionIndex)
-                              }
-                            >
-                              <Trash />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                      {errors[`options_${question.id}`] && (
-                        <p className="text-red-400 text-sm mt-1">
-                          {errors[`options_${question.id}`]}
-                        </p>
-                      )}
-                      {errors[`correct_${question.id}`] && (
-                        <p className="text-red-400 text-sm mt-1">
-                          {errors[`correct_${question.id}`]}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-semibold text-gray-300 mb-2">
-                          Marks
+                          Score *
+                        </label>
+                        <input
+                          type="number"
+                          value={question.score}
+                          onChange={(e) =>
+                            updateQuestion(
+                              question.id,
+                              "score",
+                              parseInt(e.target.value) || 0
+                            )
+                          }
+                          min="0"
+                          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white"
+                        />
+                        {errors[`score_${question.id}`] && (
+                          <p className="text-red-400 text-sm mt-1">
+                            {errors[`score_${question.id}`]}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">
+                          Marks *
                         </label>
                         <input
                           type="number"
@@ -880,31 +830,124 @@ export default function CreateQuizPage() {
                             updateQuestion(
                               question.id,
                               "marks",
-                              parseInt(e.target.value) || 0
+                              parseInt(e.target.value) || 1
                             )
                           }
                           min="1"
                           className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-300 mb-2">
-                          Explanation (Optional)
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        Explanation (Optional)
+                      </label>
+                      <textarea
+                        value={question.explanation}
+                        onChange={(e) =>
+                          updateQuestion(
+                            question.id,
+                            "explanation",
+                            e.target.value
+                          )
+                        }
+                        rows={2}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400 resize-none"
+                        placeholder="Explanation for the correct answer"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <label className="block text-sm font-semibold text-gray-300">
+                          Options * (Select the correct answer)
                         </label>
-                        <input
-                          type="text"
-                          value={question.explanation}
-                          onChange={(e) =>
-                            updateQuestion(
-                              question.id,
-                              "explanation",
-                              e.target.value
-                            )
-                          }
-                          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400"
-                          placeholder="Explain the correct answer"
-                        />
+                        <button
+                          onClick={() => addOption(question.id)}
+                          className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors duration-200 flex items-center space-x-1"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Add Option</span>
+                        </button>
                       </div>
+
+                      {errors[`options_${question.id}`] && (
+                        <p className="text-red-400 text-sm mb-2">
+                          {errors[`options_${question.id}`]}
+                        </p>
+                      )}
+
+                      {errors[`correct_${question.id}`] && (
+                        <p className="text-red-400 text-sm mb-2">
+                          {errors[`correct_${question.id}`]}
+                        </p>
+                      )}
+
+                      <div className="space-y-3">
+                        {question.options.map((option, optIndex) => (
+                          <div
+                            key={optIndex}
+                            className="flex items-center space-x-3"
+                          >
+                            <input
+                              type="radio"
+                              name={`correct_${question.id}`}
+                              checked={option.isCorrect}
+                              onChange={() =>
+                                setCorrectAnswer(question.id, optIndex)
+                              }
+                              className="w-4 h-4 text-cyan-400 bg-white/10 border-gray-300 focus:ring-cyan-400 focus:ring-2"
+                            />
+                            <input
+                              type="text"
+                              value={option.text}
+                              onChange={(e) =>
+                                updateOption(
+                                  question.id,
+                                  optIndex,
+                                  "text",
+                                  e.target.value
+                                )
+                              }
+                              className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-gray-400"
+                              placeholder={`Option ${optIndex + 1}`}
+                            />
+                            {question.options.length > 2 && (
+                              <button
+                                onClick={() =>
+                                  removeOption(question.id, optIndex)
+                                }
+                                className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors duration-200"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`required_${question.id}`}
+                        checked={question.isRequired}
+                        onChange={(e) =>
+                          updateQuestion(
+                            question.id,
+                            "isRequired",
+                            e.target.checked
+                          )
+                        }
+                        className="w-4 h-4 text-cyan-400 bg-white/10 border-gray-300 rounded focus:ring-cyan-400 focus:ring-2"
+                      />
+                      <label
+                        htmlFor={`required_${question.id}`}
+                        className="text-sm text-gray-300"
+                      >
+                        Required Question
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -914,10 +957,10 @@ export default function CreateQuizPage() {
             <div className="flex justify-between mt-8">
               <button
                 onClick={() => setCurrentStep(1)}
-                className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center space-x-2"
+                className="px-8 py-3 bg-white/10 backdrop-blur-md rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 flex items-center space-x-2"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <ArrowLeft className="w-5 h-5" />
+                <span>Back to Details</span>
               </button>
               <button
                 onClick={() => setCurrentStep(3)}
@@ -929,143 +972,387 @@ export default function CreateQuizPage() {
             </div>
           </div>
         )}
-
         {/* Step 3: Review */}
         {currentStep === 3 && (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <h2 className="text-2xl font-bold mb-8 flex items-center space-x-2">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold flex items-center space-x-2">
                 <CheckCircle className="w-6 h-6 text-cyan-400" />
-                <span>Review Your Quiz</span>
+                <span>Review Quiz</span>
               </h2>
+              <p className="text-gray-300 mt-2">
+                Review your quiz details and questions before publishing
+              </p>
+            </div>
 
-              {/* Quiz Summary */}
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
-                <div className="space-y-4">
-                  <div className="p-4 bg-white/5 rounded-xl">
-                    <h3 className="font-semibold text-cyan-400 mb-2">
-                      Quiz Details
-                    </h3>
-                    <p>
-                      <span className="text-gray-400">Title:</span>{" "}
-                      {formData.title}
-                    </p>
-                    <p>
-                      <span className="text-gray-400">Category:</span>{" "}
-                      {
-                        categories.find((c) => c.id == formData.categoryId)
-                          ?.name
-                      }
-                    </p>
-                    <p>
-                      <span className="text-gray-400">Difficulty:</span>{" "}
-                      {formData.difficulty}
-                    </p>
-                    <p>
-                      <span className="text-gray-400">Duration:</span>{" "}
-                      {formData.durationInMinutes} minutes
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="p-4 bg-white/5 rounded-xl">
-                    <h3 className="font-semibold text-cyan-400 mb-2">
-                      Quiz Statistics
-                    </h3>
-                    <p>
-                      <span className="text-gray-400">Total Questions:</span>{" "}
-                      {questions.length}
-                    </p>
-                    <p>
-                      <span className="text-gray-400">Total Marks:</span>{" "}
-                      {questions.reduce((sum, q) => sum + q.marks, 0)}
-                    </p>
-                    <p>
-                      <span className="text-gray-400">Passing Marks:</span>{" "}
-                      {formData.passingMarks}%
-                    </p>
-                    <p>
-                      <span className="text-gray-400">Max Attempts:</span>{" "}
-                      {formData.maxAttempts}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Questions Preview */}
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-cyan-400">
-                  Questions Preview
+            <div className="space-y-8">
+              {/* Quiz Details Summary */}
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl">
+                <h3 className="text-xl font-bold text-cyan-400 mb-6 flex items-center space-x-2">
+                  <Settings className="w-5 h-5" />
+                  <span>Quiz Details</span>
                 </h3>
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {questions.map((question, index) => (
-                    <div
-                      key={question.id}
-                      className="p-4 bg-white/5 rounded-xl"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold">Question {index + 1}</h4>
-                        <span className="text-sm text-cyan-400">
-                          {question.marks} marks
-                        </span>
-                      </div>
-                      <p className="text-gray-300 mb-3">{question.question}</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {question.options.map((option, optionIndex) => (
-                          <div
-                            key={optionIndex}
-                            className={`p-2 rounded-lg text-sm ${
-                              question.correctAnswer === optionIndex
-                                ? "bg-green-500/20 border border-green-500/50 text-green-300"
-                                : "bg-white/5 text-gray-400"
-                            }`}
-                          >
-                            {option.text || `Option ${optionIndex + 1}`}
-                          </div>
-                        ))}
-                      </div>
-                      {question.explanation && (
-                        <p className="text-sm text-gray-400 mt-2">
-                          <span className="font-semibold">Explanation:</span>{" "}
-                          {question.explanation}
-                        </p>
-                      )}
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Title
+                      </label>
+                      <p className="text-white font-medium">
+                        {formData.title || "Not specified"}
+                      </p>
                     </div>
-                  ))}
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Description
+                      </label>
+                      <p className="text-white">
+                        {formData.description || "No description provided"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Category
+                      </label>
+                      <p className="text-white">
+                        {categories.find(
+                          (cat) => cat.id === formData.categoryId
+                        )?.name || "Not selected"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Access Type
+                      </label>
+                      <p className="text-white capitalize">
+                        {formData.accessType?.toLowerCase()}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Difficulty
+                      </label>
+                      <p className="text-white flex items-center space-x-2">
+                        <span>
+                          {formData.difficulty === "EASY" && "🟢"}
+                          {formData.difficulty === "MEDIUM" && "🟡"}
+                          {formData.difficulty === "HARD" && "🔴"}
+                        </span>
+                        <span className="capitalize">
+                          {formData.difficulty?.toLowerCase()}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Duration
+                      </label>
+                      <p className="text-white flex items-center space-x-2">
+                        <Clock className="w-4 h-4" />
+                        <span>{formData.durationInMinutes} minutes</span>
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Max Attempts
+                      </label>
+                      <p className="text-white flex items-center space-x-2">
+                        <Target className="w-4 h-4" />
+                        <span>{formData.maxAttempts}</span>
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Start Time
+                      </label>
+                      <p className="text-white flex items-center space-x-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>
+                          {new Date(formData.startTime).toLocaleString()}
+                        </span>
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        End Time
+                      </label>
+                      <p className="text-white flex items-center space-x-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>
+                          {new Date(formData.endTime).toLocaleString()}
+                        </span>
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Total Marks
+                      </label>
+                      <p className="text-white flex items-center space-x-2">
+                        <Trophy className="w-4 h-4" />
+                        <span>
+                          {questions.reduce(
+                            (sum, q) => sum + (q.marks || 1),
+                            0
+                          )}
+                        </span>
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-semibold text-gray-400">
+                        Passing Marks
+                      </label>
+                      <p className="text-white">{formData.passingMarks}%</p>
+                    </div>
+                  </div>
                 </div>
+
+                {formData.instructions && (
+                  <div className="mt-6 pt-6 border-t border-white/20">
+                    <label className="text-sm font-semibold text-gray-400">
+                      Instructions
+                    </label>
+                    <p className="text-white mt-1">{formData.instructions}</p>
+                  </div>
+                )}
               </div>
 
-              {/* Actions */}
-              <div className="flex justify-between">
+              {/* Questions Summary */}
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl">
+                <h3 className="text-xl font-bold text-cyan-400 mb-6 flex items-center space-x-2">
+                  <BookOpen className="w-5 h-5" />
+                  <span>Questions ({questions.length})</span>
+                </h3>
+
+                {questions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                    <p className="text-gray-300">No questions added yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {questions.map((question, index) => (
+                      <div
+                        key={question.id}
+                        className="bg-white/5 rounded-2xl p-6 border border-white/10"
+                      >
+                        <div className="flex items-start justify-between mb-4">
+                          <h4 className="text-lg font-semibold text-white">
+                            Question {index + 1}
+                            {question.isRequired && (
+                              <span className="ml-2 text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded-full">
+                                Required
+                              </span>
+                            )}
+                          </h4>
+                          <div className="flex items-center space-x-4 text-sm text-gray-400">
+                            <span>Score: {question.score}</span>
+                            <span>Marks: {question.marks}</span>
+                          </div>
+                        </div>
+
+                        <p className="text-white mb-4">
+                          {question.text || "No question text"}
+                        </p>
+
+                        <div className="grid md:grid-cols-2 gap-3">
+                          {question.options.map((option, optIndex) => (
+                            <div
+                              key={optIndex}
+                              className={`p-3 rounded-lg border ${
+                                option.isCorrect
+                                  ? "bg-green-500/20 border-green-500/50 text-green-400"
+                                  : "bg-white/5 border-white/10 text-gray-300"
+                              }`}
+                            >
+                              <div className="flex items-center space-x-2">
+                                {option.isCorrect && (
+                                  <CheckCircle className="w-4 h-4 text-green-400" />
+                                )}
+                                <span className="text-sm font-medium">
+                                  {String.fromCharCode(65 + optIndex)}.
+                                </span>
+                                <span>
+                                  {option.text || `Option ${optIndex + 1}`}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {question.explanation && (
+                          <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                            <p className="text-sm text-blue-400 font-medium mb-1">
+                              Explanation:
+                            </p>
+                            <p className="text-sm text-blue-300">
+                              {question.explanation}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Validation Summary */}
+              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl">
+                <h3 className="text-xl font-bold text-cyan-400 mb-6 flex items-center space-x-2">
+                  <AlertCircle className="w-5 h-5" />
+                  <span>Validation Summary</span>
+                </h3>
+
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    {formData.title ? (
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-400" />
+                    )}
+                    <span
+                      className={
+                        formData.title ? "text-green-400" : "text-red-400"
+                      }
+                    >
+                      Quiz title is {formData.title ? "set" : "missing"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    {formData.categoryId ? (
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-400" />
+                    )}
+                    <span
+                      className={
+                        formData.categoryId ? "text-green-400" : "text-red-400"
+                      }
+                    >
+                      Category is{" "}
+                      {formData.categoryId ? "selected" : "not selected"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    {questions.length > 0 ? (
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-400" />
+                    )}
+                    <span
+                      className={
+                        questions.length > 0
+                          ? "text-green-400"
+                          : "text-yellow-400"
+                      }
+                    >
+                      {questions.length} question
+                      {questions.length !== 1 ? "s" : ""} added
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    {questions.every(
+                      (q) =>
+                        q.text &&
+                        q.options.length >= 2 &&
+                        q.options.some((opt) => opt.isCorrect)
+                    ) ? (
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-400" />
+                    )}
+                    <span
+                      className={
+                        questions.every(
+                          (q) =>
+                            q.text &&
+                            q.options.length >= 2 &&
+                            q.options.some((opt) => opt.isCorrect)
+                        )
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }
+                    >
+                      All questions are{" "}
+                      {questions.every(
+                        (q) =>
+                          q.text &&
+                          q.options.length >= 2 &&
+                          q.options.some((opt) => opt.isCorrect)
+                      )
+                        ? "complete"
+                        : "incomplete"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    {new Date(formData.startTime) <
+                    new Date(formData.endTime) ? (
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-400" />
+                    )}
+                    <span
+                      className={
+                        new Date(formData.startTime) <
+                        new Date(formData.endTime)
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }
+                    >
+                      Quiz timing is{" "}
+                      {new Date(formData.startTime) < new Date(formData.endTime)
+                        ? "valid"
+                        : "invalid"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation and Actions */}
+            <div className="flex justify-between items-center mt-8">
+              <button
+                onClick={() => setCurrentStep(2)}
+                className="px-8 py-3 bg-white/10 backdrop-blur-md rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 flex items-center space-x-2"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span>Back to Questions</span>
+              </button>
+
+              <div className="flex items-center space-x-4">
                 <button
-                  onClick={() => setCurrentStep(2)}
-                  className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center space-x-2"
+                  onClick={() => handleSubmit(true)}
+                  disabled={isSubmitting}
+                  className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 flex items-center space-x-2 disabled:opacity-50"
                 >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back to Questions</span>
+                  <Save className="w-5 h-5" />
+                  <span>{isSubmitting ? "Saving..." : "Save as Draft"}</span>
                 </button>
 
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => handleSubmit(true)}
-                    disabled={isSubmitting}
-                    className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 border border-white/20 disabled:opacity-50 flex items-center space-x-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>Save as Draft</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleSubmit(false)}
-                    disabled={isSubmitting}
-                    className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 disabled:opacity-50 flex items-center space-x-2"
-                  >
-                    <Trophy className="w-5 h-5" />
-                    <span>
-                      {isSubmitting ? "Publishing..." : "Publish Quiz"}
-                    </span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleSubmit(false)}
+                  disabled={isSubmitting || questions.length === 0}
+                  className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-semibold hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-2 disabled:opacity-50"
+                >
+                  <Play className="w-5 h-5" />
+                  <span>{isSubmitting ? "Publishing..." : "Publish Quiz"}</span>
+                </button>
               </div>
             </div>
           </div>

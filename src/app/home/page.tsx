@@ -18,8 +18,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/slices/authSlice";
-import { GetPublicQuiz, GetQuiz } from "@/store/slices/quizSlice";
+import { RootState } from "@/store";
+import {
+  GetPublicQuiz,
+  GetQuiz,
+  GetTeacherQuiz,
+} from "@/store/slices/quizSlice";
 import Loading from "@/components/Loading";
 import { QuizCard } from "@/components/QuizCard";
 
@@ -40,7 +44,12 @@ export default function QuizHomePage() {
     (state: RootState) => state.auth
   );
   const quizState = useSelector((state) => state.quiz);
-  const { publicQuiz = [], privateQuiz = [], loading = true } = quizState || {};
+  const {
+    publicQuiz = [],
+    privateQuiz = [],
+    protectedQuiz = [],
+    loading = true,
+  } = quizState || {};
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("ALL");
@@ -48,10 +57,12 @@ export default function QuizHomePage() {
   const [activeTab, setActiveTab] = useState("public");
 
   useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(GetQuiz());
-    } else {
+    if (isAuthenticated === false) {
       dispatch(GetPublicQuiz());
+    } else if (isAuthenticated === true && user.role === "STUDENT") {
+      dispatch(GetQuiz());
+    } else if (isAuthenticated === true && user.role === "TEACHER") {
+      dispatch(GetTeacherQuiz());
     }
   }, [dispatch, isAuthenticated]);
 
@@ -86,7 +97,12 @@ export default function QuizHomePage() {
 
   const filteredPublicQuizzes = filterQuizzes(publicQuiz || []);
   const filteredPrivateQuizzes = filterQuizzes(privateQuiz || []);
-  const allQuizzes = [...(publicQuiz || []), ...(privateQuiz || [])];
+  const filteredProtectedQuizzes = filterQuizzes(protectedQuiz || []);
+  const allQuizzes = [
+    ...(publicQuiz || []),
+    ...(privateQuiz || []),
+    ...(protectedQuiz || []),
+  ];
   const categories = getUniqueCategories(allQuizzes);
 
   return (
@@ -256,6 +272,18 @@ export default function QuizHomePage() {
                 My Private Quizzes ({filteredPrivateQuizzes.length})
               </button>
             )}
+            {isAuthenticated && user.role === "TEACHER" && (
+              <button
+                onClick={() => setActiveTab("protected")}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  activeTab === "protected"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-600 text-white"
+                    : "text-gray-300 hover:text-white"
+                }`}
+              >
+                My Protected Quizzes ({filteredProtectedQuizzes.length})
+              </button>
+            )}
           </div>
         </div>
 
@@ -264,14 +292,31 @@ export default function QuizHomePage() {
           {activeTab === "public" &&
             filteredPublicQuizzes.length > 0 &&
             filteredPublicQuizzes.map((quiz) => (
-              <QuizCard key={quiz.id} quiz={quiz} />
+              <QuizCard key={quiz.id} quiz={quiz} role={user?.role} />
             ))}
 
           {activeTab === "private" &&
             isAuthenticated &&
             filteredPrivateQuizzes.length > 0 &&
             filteredPrivateQuizzes.map((quiz) => (
-              <QuizCard key={quiz.id} quiz={quiz} isPrivate={true} />
+              <QuizCard
+                key={quiz.id}
+                quiz={quiz}
+                isPrivate={true}
+                role={user?.role}
+              />
+            ))}
+          {activeTab === "protected" &&
+            isAuthenticated &&
+            user.role === "TEACHER" &&
+            filteredProtectedQuizzes.length > 0 &&
+            filteredProtectedQuizzes.map((quiz) => (
+              <QuizCard
+                key={quiz.id}
+                quiz={quiz}
+                isPrivate={true}
+                role={user?.role}
+              />
             ))}
         </div>
 
@@ -305,6 +350,8 @@ export default function QuizHomePage() {
                 selectedDifficulty !== "ALL" ||
                 selectedCategory !== "ALL"
                   ? "Try adjusting your search filters"
+                  : user.role === "TEACHER"
+                  ? "You haven't created any protected quizzes yet"
                   : "You haven't been assigned any private quizzes yet"}
               </p>
             </div>
@@ -327,6 +374,24 @@ export default function QuizHomePage() {
             </Link>
           </div>
         )}
+        {activeTab === "protected" &&
+          isAuthenticated &&
+          user.role === "TEACHER" &&
+          filteredProtectedQuizzes.length === 0 && (
+            <div className="text-center py-16">
+              <Lock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-300 mb-2">
+                No Protected Quizzes Found
+              </h3>
+              <p className="text-gray-400">
+                {searchTerm ||
+                selectedDifficulty !== "ALL" ||
+                selectedCategory !== "ALL"
+                  ? "Try adjusting your search filters"
+                  : "You haven't created any protected quizzes yet"}
+              </p>
+            </div>
+          )}
       </div>
     </div>
   );

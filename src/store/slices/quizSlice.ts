@@ -48,8 +48,13 @@ const quizSlice = createSlice({
   },
 });
 
-export const { setPublicQuiz, setPrivateQuiz, setQuizesfailed, setLoading } =
-  quizSlice.actions;
+export const {
+  setPublicQuiz,
+  setPrivateQuiz,
+  setProtectedQuiz,
+  setQuizesfailed,
+  setLoading,
+} = quizSlice.actions;
 
 export default quizSlice.reducer;
 
@@ -91,6 +96,25 @@ export const GetQuiz = () => async (dispatch: any) => {
           quiz: res.data.data.assignedQuizzes,
         })
       );
+    } else {
+      dispatch(setQuizesfailed());
+    }
+  } catch (error) {
+    dispatch(setQuizesfailed());
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const GetTeacherQuiz = () => async (dispatch: any) => {
+  dispatch(setLoading(true));
+  try {
+    const res = await axios.get("/quiz/own-quiz");
+
+    if (res.data.success) {
+      dispatch(setPublicQuiz({ quiz: res.data.data.publicQuizzes }));
+      dispatch(setPrivateQuiz({ quiz: res.data.data.privateQuizzes }));
+      dispatch(setProtectedQuiz({ quiz: res.data.data.protectedQuizzes }));
     } else {
       dispatch(setQuizesfailed());
     }
