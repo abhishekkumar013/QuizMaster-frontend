@@ -24,6 +24,7 @@ import { toast } from "react-toastify";
 import { RootState } from "@/store";
 import { GetCategory } from "@/store/slices/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
+import Logo from "@/components/Logo";
 
 export default function CreateQuizPage() {
   const dispatch = useDispatch();
@@ -392,14 +393,7 @@ export default function CreateQuizPage() {
           <button className="p-2 hover:bg-white/10 rounded-full transition-colors duration-200">
             <ArrowLeft className="w-6 h-6" />
           </button>
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Play className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-              QuizMaster
-            </span>
-          </div>
+          <Logo />
         </div>
 
         <div className="flex items-center space-x-4">

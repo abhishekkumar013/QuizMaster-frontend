@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import swap from "@/assests/swap.png";
+import { getUserInitial } from "@/lib/UserInitial";
 
 export default function QuizLandingPage() {
   const dispatch = useDispatch();
@@ -86,13 +87,6 @@ export default function QuizLandingPage() {
     },
   ];
 
-  const getUserInitial = () => {
-    if (user?.name) {
-      return user.name.charAt(0).toUpperCase();
-    }
-    return "U";
-  };
-
   const handleLogout = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -150,7 +144,7 @@ export default function QuizLandingPage() {
               className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20"
             >
               <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                {getUserInitial()}
+                {getUserInitial(user)}
               </div>
               <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${

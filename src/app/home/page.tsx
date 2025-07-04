@@ -26,6 +26,8 @@ import {
 } from "@/store/slices/quizSlice";
 import Loading from "@/components/Loading";
 import { QuizCard } from "@/components/QuizCard";
+import Logo from "@/components/Logo";
+import { getUserInitial } from "@/lib/UserInitial";
 
 interface Category {
   id: string;
@@ -71,13 +73,6 @@ export default function QuizHomePage() {
     return [...new Set(categories)];
   };
 
-  const getUserInitial = () => {
-    if (user?.name) {
-      return user.name.charAt(0).toUpperCase();
-    }
-    return "U";
-  };
-
   const filterQuizzes = (quizzes: Quiz[]) => {
     return quizzes.filter((quiz) => {
       const matchesSearch = quiz.title
@@ -118,14 +113,7 @@ export default function QuizHomePage() {
         <nav className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             {/* Logo - Top Left */}
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Play className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                QuizMaster
-              </span>
-            </Link>
+            <Logo />
 
             {/* Navigation Links (Optional - you can add more links here) */}
             <div className="hidden md:flex items-center space-x-6">
@@ -154,7 +142,7 @@ export default function QuizHomePage() {
                     </Link>
                   )}
                   <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {getUserInitial()}
+                    {getUserInitial(user)}
                   </div>
                 </>
               )}

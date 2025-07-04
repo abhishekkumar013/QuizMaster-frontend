@@ -69,7 +69,7 @@ export const CheckLoginStatus = () => async (dispatch: any) => {
 
     if (res.data.success) {
       const { token, ...userWithoutToken } = res.data.data;
-
+      console.log(userWithoutToken);
       dispatch(
         loginSuccess({
           user: userWithoutToken,
