@@ -28,6 +28,7 @@ import Loading from "@/components/Loading";
 import { QuizCard } from "@/components/QuizCard";
 import Logo from "@/components/Logo";
 import { getUserInitial } from "@/lib/UserInitial";
+import BackButtonLogo from "@/components/BackButton-Logo";
 
 interface Category {
   id: string;
@@ -45,7 +46,7 @@ export default function QuizHomePage() {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
-  const quizState = useSelector((state) => state.quiz);
+  const quizState = useSelector((state: RootState) => state.quiz);
   const {
     publicQuiz = [],
     privateQuiz = [],
@@ -113,7 +114,8 @@ export default function QuizHomePage() {
         <nav className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             {/* Logo - Top Left */}
-            <Logo />
+            <BackButtonLogo />
+            {/* <Logo /> */}
 
             {/* Navigation Links (Optional - you can add more links here) */}
             <div className="hidden md:flex items-center space-x-6">
@@ -280,7 +282,12 @@ export default function QuizHomePage() {
           {activeTab === "public" &&
             filteredPublicQuizzes.length > 0 &&
             filteredPublicQuizzes.map((quiz) => (
-              <QuizCard key={quiz.id} quiz={quiz} role={user?.role} />
+              <QuizCard
+                key={quiz.id}
+                quiz={quiz}
+                role={user?.role}
+                isAuthenticated={isAuthenticated}
+              />
             ))}
 
           {activeTab === "private" &&
@@ -292,6 +299,7 @@ export default function QuizHomePage() {
                 quiz={quiz}
                 isPrivate={true}
                 role={user?.role}
+                isAuthenticated={isAuthenticated}
               />
             ))}
           {activeTab === "protected" &&
@@ -304,6 +312,7 @@ export default function QuizHomePage() {
                 quiz={quiz}
                 isPrivate={true}
                 role={user?.role}
+                isAuthenticated={isAuthenticated}
               />
             ))}
         </div>

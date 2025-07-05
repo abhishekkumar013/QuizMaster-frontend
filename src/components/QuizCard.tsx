@@ -23,10 +23,12 @@ export const QuizCard = ({
   quiz,
   isPrivate = false,
   role = "STUDENT",
+  isAuthenticated = false,
 }: {
   quiz: Quiz;
   isPrivate?: boolean;
   role?: String;
+  isAuthenticated: boolean;
 }) => {
   const isActive = isQuizActive(quiz.startTime, quiz.endTime);
 
@@ -135,19 +137,25 @@ export const QuizCard = ({
               quiz.id
             }`}
             className={`group/btn flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
-              isActive
+              isActive && !quiz.isReachMaxAttempt
                 ? "bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white"
                 : "bg-gray-600/50 text-gray-400 cursor-not-allowed"
             }`}
             onClick={(e) => {
-              if (!isActive) {
+              if (!isActive && quiz.isReachMaxAttempt) {
                 e.preventDefault();
               }
             }}
           >
-            <Play className="w-4 h-4" />
-            <span>Start Quiz</span>
-            {isActive && (
+            {!quiz.isReachMaxAttempt ? (
+              <>
+                <Play className="w-4 h-4" />
+                <span>Start Quiz</span>
+              </>
+            ) : (
+              <span>Max Attempted</span>
+            )}
+            {isActive && !quiz.isReachMaxAttempt && (
               <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
             )}
           </Link>

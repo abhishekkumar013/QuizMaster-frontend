@@ -84,7 +84,7 @@ export const GetQuiz = () => async (dispatch: any) => {
 
   try {
     const res = await axios.get("/quiz/all-quiz");
-
+    console.log(res.data);
     if (res.data.success) {
       dispatch(
         setPublicQuiz({

@@ -24,7 +24,7 @@ import { toast } from "react-toastify";
 import { RootState } from "@/store";
 import { GetCategory } from "@/store/slices/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
-import Logo from "@/components/Logo";
+import BackButtonLogo from "@/components/BackButton-Logo";
 
 export default function CreateQuizPage() {
   const dispatch = useDispatch();
@@ -389,12 +389,7 @@ export default function CreateQuizPage() {
 
       {/* Navigation */}
       <nav className="relative z-10 p-6 flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <button className="p-2 hover:bg-white/10 rounded-full transition-colors duration-200">
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <Logo />
-        </div>
+        <BackButtonLogo />
 
         <div className="flex items-center space-x-4">
           <button
@@ -946,6 +941,15 @@ export default function CreateQuizPage() {
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={addQuestion}
+                className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Question</span>
+              </button>
             </div>
 
             <div className="flex justify-between mt-8">

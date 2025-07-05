@@ -65,7 +65,7 @@ export const CheckLoginStatus = () => async (dispatch: any) => {
 
   try {
     const res = await axios.get("/auth/user/isauthenticated");
-    console.log("CheckLoginStatus Response:", res);
+    // console.log("CheckLoginStatus Response:", res);
 
     if (res.data.success) {
       const { token, ...userWithoutToken } = res.data.data;
