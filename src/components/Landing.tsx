@@ -105,9 +105,8 @@ export default function QuizLandingPage() {
   const handleUpdateProfile = (e) => {
     e.preventDefault();
 
-    setShowUserDropdown(false); // Close dropdown
-    // Add your update profile logic here
-    console.log("Update profile clicked");
+    setShowUserDropdown(false);
+    router.push(`/update-profile/${user.id}`);
   };
 
   const handleSwitchAccount = (e) => {
