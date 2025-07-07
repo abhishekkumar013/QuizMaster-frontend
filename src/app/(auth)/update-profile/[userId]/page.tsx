@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/slices/authSlice";
+import { RootState, updateProfile } from "@/store/slices/authSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
@@ -12,43 +12,35 @@ import HeaderBar from "@/components/HeaderBar";
 export default function UpdateProfilePage() {
   const { userId } = useParams();
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, loading } = useSelector((state: RootState) => state.auth);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     role: "",
-    parentId: "",
+    parentEmail: "",
     phone: "",
     experienceYears: "",
   });
 
-  const [loading, setLoading] = useState(false);
   const [parentName, setParentName] = useState("");
 
   useEffect(() => {
     if (user && user.id !== userId) {
       toast.error("You are not authorized to edit this profile");
-      router.push("/home");
+      router.replace("/home");
     } else {
       setFormData({
         name: user?.name || "",
         email: user?.email || "",
         role: user?.role || "",
-        parentId: user?.parentId || "",
+        parentEmail: user?.parentDetail?.user?.email || "",
         phone: user?.phone || "",
         experienceYears: user?.experienceYears?.toString() || "",
       });
 
-      if (user?.role === "STUDENT" && user?.parentId) {
-        axios
-          .get(`/api/v1/user/${user.parentId}`)
-          .then((res) => {
-            setParentName(res.data.data.name);
-          })
-          .catch(() => {
-            setParentName("Not found");
-          });
+      if (user?.role === "STUDENT" && user?.parent?.email) {
+        setParentName(user?.parentDetail?.user?.name || "No-Parent");
       }
     }
   }, [user, userId]);
@@ -59,15 +51,16 @@ export default function UpdateProfilePage() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
+
     try {
-      const res = await axios.put(`/api/v1/user/update/${userId}`, formData);
-      toast.success(res.data.message);
-      router.push("/home");
+      const res = await updateProfile(formData);
+      if (res && res.success) {
+        toast.success(res.message);
+      } else {
+        toast.error("Something Went Wrong!");
+      }
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Update failed");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -127,12 +120,12 @@ export default function UpdateProfilePage() {
           {formData.role === "STUDENT" && (
             <div>
               <label className="block text-sm text-gray-300 mb-1">
-                Parent ID
+                Parent Email
               </label>
               <input
                 type="text"
-                name="parentId"
-                value={formData.parentId}
+                name="parentEmail"
+                value={formData.parentEmail}
                 onChange={handleChange}
                 className="w-full px-4 py-2 rounded-lg bg-white/20 text-white border border-white/20 focus:outline-none"
                 placeholder="Parent user ID"

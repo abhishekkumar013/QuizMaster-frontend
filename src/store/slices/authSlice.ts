@@ -44,9 +44,15 @@ const authSlice = createSlice({
       state.loading = false;
     },
     updateProfile(state, action: PayloadAction<AuthPayload>) {
-      state.isAuthenticated = true;
+      state.isAuthenticated = state.isAuthenticated;
       state.user = action.payload.user;
       state.token = action.payload.token ?? state.token;
+      state.loading = false;
+    },
+    updateProfileFailed(state) {
+      state.isAuthenticated = state.isAuthenticated;
+      state.user = state.user;
+      state.token = state.token;
       state.loading = false;
     },
     setLoading(state, action: PayloadAction<boolean>) {
@@ -55,8 +61,14 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginSuccess, loginFailed, logout, updateProfile, setLoading } =
-  authSlice.actions;
+export const {
+  loginSuccess,
+  loginFailed,
+  logout,
+  updateProfile,
+  updateProfileFailed,
+  setLoading,
+} = authSlice.actions;
 
 export default authSlice.reducer;
 
@@ -150,10 +162,34 @@ export const switchAccont = (formData: any) => async (dispatch: any) => {
       );
       return res.data;
     } else {
+      dispatch(updateProfileFailed());
       return null;
     }
   } catch (error) {
-    console.error("Error during switch account:", error);
+    dispatch(updateProfileFailed());
+    return error.response?.data || null;
+  }
+};
+
+export const UpdateUser = (formData: any) => async (dispatch: any) => {
+  try {
+    const res = await axios.post(`/auth/users/update/${user.id}`, formData);
+
+    if (res.data.success) {
+      const user = res.data.data;
+
+      dispatch(
+        updateProfile({
+          user: user,
+        })
+      );
+      return res.data;
+    } else {
+      dispatch(updateProfileFailed());
+      return null;
+    }
+  } catch (error) {
+    dispatch(updateProfileFailed());
     return error.response?.data || null;
   }
 };
