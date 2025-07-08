@@ -84,7 +84,7 @@ export const GetQuiz = () => async (dispatch: any) => {
 
   try {
     const res = await axios.get("/quiz/all-quiz");
-    console.log(res.data);
+    // console.log(res.data);
     if (res.data.success) {
       dispatch(
         setPublicQuiz({
@@ -110,7 +110,7 @@ export const GetTeacherQuiz = () => async (dispatch: any) => {
   dispatch(setLoading(true));
   try {
     const res = await axios.get("/quiz/own-quiz");
-    console.log(res.data);
+    // console.log(res.data);
 
     if (res.data.success) {
       dispatch(setPublicQuiz({ quiz: res.data.data.publicQuizzes }));

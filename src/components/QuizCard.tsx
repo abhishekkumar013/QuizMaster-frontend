@@ -106,18 +106,31 @@ export const QuizCard = ({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        {role === "TEACHER" ? (
+      {/* Fixed button container */}
+      {role === "TEACHER" ? (
+        <div className="flex items-center justify-between gap-3">
           <Link
             href={`/teacher/quiz-report/${quiz.id}`}
-            className="group/btn flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 
-              bg-gradient-to-r from-pink-500 to-green-600 hover:from-pink-600 hover:to-green-700 text-white"
+            className="group/btn flex items-center space-x-2 px-4 py-3 rounded-2xl font-semibold transition-all duration-300 
+              bg-gradient-to-r from-pink-500 to-green-600 hover:from-pink-600 hover:to-green-700 text-white flex-1"
           >
             <NotebookTabs className="w-4 h-4" />
             <span>Report</span>
             <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
           </Link>
-        ) : (
+
+          <Link
+            href={`/teacher/update-quiz/${quiz.id}`}
+            className="group/btn flex items-center space-x-2 px-4 py-3 rounded-2xl font-semibold transition-all duration-300 
+              bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white flex-1"
+          >
+            <CloudUpload className="w-4 h-4" />
+            <span>Update</span>
+            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+          </Link>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
           <div
             className={`flex items-center space-x-2 text-sm ${
               isActive ? "text-green-400" : "text-red-400"
@@ -130,19 +143,7 @@ export const QuizCard = ({
             ></div>
             <span>{isActive ? "Live Now" : "Not Active"}</span>
           </div>
-        )}
 
-        {role === "TEACHER" ? (
-          <Link
-            href={`/teacher/update-quiz/${quiz.id}`}
-            className="group/btn flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 
-              bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white"
-          >
-            <CloudUpload className="w-4 h-4" />
-            <span>Update</span>
-            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-          </Link>
-        ) : (
           <Link
             href={`/quiz/${quiz.title.toLowerCase().replace(/\s+/g, "-")}/${
               quiz.id
@@ -153,7 +154,7 @@ export const QuizCard = ({
                 : "bg-gray-600/50 text-gray-400 cursor-not-allowed"
             }`}
             onClick={(e) => {
-              if (!isActive && quiz.isReachMaxAttempt) {
+              if (!isActive || quiz.isReachMaxAttempt) {
                 e.preventDefault();
               }
             }}
@@ -170,8 +171,8 @@ export const QuizCard = ({
               <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
             )}
           </Link>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

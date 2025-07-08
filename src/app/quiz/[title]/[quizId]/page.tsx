@@ -77,6 +77,7 @@ const QuizTakingComponent = () => {
     setLoading(true);
     try {
       const res = await axios.get(`quiz/id/${quizId}`);
+      // console.log("quiz idata",res.)
       if (res.data.success) {
         setQuiz(res.data.data);
         setTimeLeft(res.data.data.durationInMinutes * 60);

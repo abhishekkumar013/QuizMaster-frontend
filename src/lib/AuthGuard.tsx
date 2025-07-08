@@ -20,7 +20,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     "/update-profile",
     "/teacher/quiz-report",
   ];
-  const studentRoutes = ["/quiz/test", "/update-profile"];
+  const studentRoutes = ["/quiz/test", "/update-profile", "/quiz"];
 
   useEffect(() => {
     if (!loading && !isAuthenticated && !publicRoutes.includes(pathname)) {
