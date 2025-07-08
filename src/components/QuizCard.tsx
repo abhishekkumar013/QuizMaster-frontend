@@ -101,7 +101,7 @@ export const QuizCard = ({
         <div className="text-sm text-gray-400">
           <span>Created by: </span>
           <span className="text-purple-400 font-medium">
-            {quiz.createdBy.name}
+            {quiz.createdBy.user.name}
           </span>
         </div>
       </div>
