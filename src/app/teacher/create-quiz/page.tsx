@@ -320,15 +320,12 @@ export default function CreateQuizPage() {
         return;
       }
 
-      // Calculate total marks from questions
       const calculatedTotalMarks = questions.reduce(
         (sum, q) => sum + (q.marks || 1),
         0
       );
 
-      // Prepare payload matching controller expectations
       const payload = {
-        // Quiz fields
         title: formData.title.trim(),
         description: formData.description?.trim() || null,
         instructions: formData.instructions?.trim() || null,
@@ -342,7 +339,7 @@ export default function CreateQuizPage() {
         totalMarks: calculatedTotalMarks,
         passingMarks: formData.passingMarks,
         maxAttempts: formData.maxAttempts,
-        // Questions field
+        // Questions
         questions: questions.map((q) => ({
           text: q.text.trim(),
           score: q.score,
@@ -351,7 +348,7 @@ export default function CreateQuizPage() {
           order: q.order,
           isRequired: q.isRequired !== undefined ? q.isRequired : true,
           options: q.options
-            .filter((opt) => opt.text.trim()) // Only include non-empty options
+            .filter((opt) => opt.text.trim())
             .map((opt, index) => ({
               text: opt.text.trim(),
               isCorrect: opt.isCorrect,

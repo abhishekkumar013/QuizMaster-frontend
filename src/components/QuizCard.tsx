@@ -145,9 +145,9 @@ export const QuizCard = ({
           </div>
 
           <Link
-            href={`/quiz/${quiz.title.toLowerCase().replace(/\s+/g, "-")}/${
-              quiz.id
-            }`}
+            href={`/student/quiz/${quiz.title
+              .toLowerCase()
+              .replace(/\s+/g, "-")}/${quiz.id}`}
             className={`group/btn flex items-center space-x-2 px-6 py-3 rounded-2xl font-semibold transition-all duration-300 ${
               isActive && !quiz.isReachMaxAttempt
                 ? "bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white"
