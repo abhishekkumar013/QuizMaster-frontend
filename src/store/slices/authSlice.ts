@@ -173,8 +173,9 @@ export const switchAccont = (formData: any) => async (dispatch: any) => {
 
 export const UpdateUser = (formData: any) => async (dispatch: any) => {
   try {
-    const res = await axios.post(`/auth/users/update/${user.id}`, formData);
-
+    console.log(formData.id);
+    const res = await axios.put(`/auth/users/update/${formData.id}`, formData);
+    // console.log("R", res);
     if (res.data.success) {
       const user = res.data.data;
 
@@ -189,6 +190,7 @@ export const UpdateUser = (formData: any) => async (dispatch: any) => {
       return null;
     }
   } catch (error) {
+    console.log("Error ->", error.response);
     dispatch(updateProfileFailed());
     return error.response?.data || null;
   }

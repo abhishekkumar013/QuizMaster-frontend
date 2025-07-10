@@ -16,7 +16,7 @@ const HeaderBar = () => {
       </div>
 
       <Link
-        href={`/update-profile/${user.id}`}
+        href={`/update-profile/${user?.id}`}
         className="group w-auto px-4 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-md hover:scale-105 transition-transform duration-200 shadow-lg"
       >
         <UserRoundCog className="w-5 h-5 mr-2 group-hover:rotate-12 transition-all duration-200" />

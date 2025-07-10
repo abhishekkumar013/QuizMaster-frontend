@@ -22,42 +22,53 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   ];
   const studentRoutes = ["/quiz/test", "/update-profile", "/student"];
 
-  useEffect(() => {
-    if (!loading && !isAuthenticated && !publicRoutes.includes(pathname)) {
-      router.replace("/signin");
-    }
+  const isPublicRoute = publicRoutes.some(
+    (route) => route === pathname || pathname.startsWith(route + "/")
+  );
 
-    const isTeacherRoute = teacherRoutes.some((route) =>
-      pathname.startsWith(route)
-    );
+  const isTeacherRoute = teacherRoutes.some(
+    (route) => route === pathname || pathname.startsWith(route + "/")
+  );
+  const isStudentRoute = studentRoutes.some(
+    (route) => route === pathname || pathname.startsWith(route + "/")
+  );
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated && !isPublicRoute) {
+      router.replace("/signin");
+      return;
+    }
 
     if (
       !loading &&
       isAuthenticated &&
       user.role === "TEACHER" &&
-      !publicRoutes.includes(pathname) &&
+      !isPublicRoute &&
       !isTeacherRoute
     ) {
       router.replace("/home");
+      return;
     }
-
-    const isStudntRoute = studentRoutes.some((route) =>
-      pathname.startsWith(route)
-    );
 
     if (
       !loading &&
       isAuthenticated &&
       user.role === "STUDENT" &&
-      !publicRoutes.includes(pathname) &&
-      !isStudntRoute
+      !isPublicRoute &&
+      !isStudentRoute
     ) {
       router.replace("/home");
+      return;
     }
   }, [isAuthenticated, pathname, loading, user]);
 
-  if (loading && !publicRoutes.includes(pathname)) {
+  if (loading && !isPublicRoute) {
     return <Loading />;
+  }
+
+  // Don't render children if unauthenticated and route is not public
+  if (!loading && !isAuthenticated && !isPublicRoute) {
+    return null;
   }
 
   return children;

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState, updateProfile } from "@/store/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, UpdateUser } from "@/store/slices/authSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
@@ -14,6 +14,8 @@ export default function UpdateProfilePage() {
   const router = useRouter();
   const { user, loading } = useSelector((state: RootState) => state.auth);
 
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,6 +23,7 @@ export default function UpdateProfilePage() {
     parentEmail: "",
     phone: "",
     experienceYears: "",
+    id: "",
   });
 
   const [parentName, setParentName] = useState("");
@@ -34,7 +37,7 @@ export default function UpdateProfilePage() {
         name: user?.name || "",
         email: user?.email || "",
         role: user?.role || "",
-        parentEmail: user?.parentDetail?.user?.email || "",
+        parentEmail: user?.parentDetail?.user?.email || user?.parentEmail || "",
         phone: user?.phone || "",
         experienceYears: user?.experienceYears?.toString() || "",
       });
@@ -53,11 +56,13 @@ export default function UpdateProfilePage() {
     e.preventDefault();
 
     try {
-      const res = await updateProfile(formData);
+      setFormData({ ...formData, ["id"]: user.id });
+      const res = await dispatch(UpdateUser(formData));
+      // console.log(res);
       if (res && res.success) {
         toast.success(res.message);
       } else {
-        toast.error("Something Went Wrong!");
+        toast.error(res.message);
       }
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Update failed");
@@ -128,7 +133,7 @@ export default function UpdateProfilePage() {
                 value={formData.parentEmail}
                 onChange={handleChange}
                 className="w-full px-4 py-2 rounded-lg bg-white/20 text-white border border-white/20 focus:outline-none"
-                placeholder="Parent user ID"
+                placeholder="Parent Email ID"
               />
             </div>
           )}

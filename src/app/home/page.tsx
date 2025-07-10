@@ -122,7 +122,7 @@ export default function QuizHomePage() {
             <div className="hidden md:flex items-center space-x-6">
               <Link
                 href="/"
-                className="text-gray-300 hover:text-white transition-colors duration-300"
+                className="px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300"
               >
                 Home
               </Link>
