@@ -21,6 +21,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     "/teacher/quiz-report",
   ];
   const studentRoutes = ["/quiz/test", "/update-profile", "/student"];
+  const parentRoutes = ["/parent/home"];
 
   const isPublicRoute = publicRoutes.some(
     (route) => route === pathname || pathname.startsWith(route + "/")
@@ -32,8 +33,21 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const isStudentRoute = studentRoutes.some(
     (route) => route === pathname || pathname.startsWith(route + "/")
   );
+  const isParentRoutes = parentRoutes.some(
+    (route) => route === pathname || pathname.startsWith(route + "/")
+  );
 
   useEffect(() => {
+    if (
+      isAuthenticated &&
+      user.role === "PARENT" &&
+      pathname === "/home" &&
+      !isParentRoutes
+    ) {
+      router.replace("/parent/home");
+      return;
+    }
+
     if (!loading && !isAuthenticated && !isPublicRoute) {
       router.replace("/signin");
       return;
@@ -58,6 +72,18 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       !isStudentRoute
     ) {
       router.replace("/home");
+      return;
+    }
+
+    if (
+      !loading &&
+      isAuthenticated &&
+      user.role === "PARENT" &&
+      !isPublicRoute &&
+      !isParentRoutes &&
+      pathname === "/home"
+    ) {
+      router.replace("/parent/home");
       return;
     }
   }, [isAuthenticated, pathname, loading, user]);
