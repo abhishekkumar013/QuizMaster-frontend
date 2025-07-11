@@ -222,7 +222,7 @@ const ParentHomePage = () => {
                           </div>
                           <div className="flex items-center space-x-1 text-xs text-gray-400">
                             <Clock className="w-3 h-3" />
-                            {/* <span>{child.lastActivity}</span> */}
+                            {/* <span>{child.lastActivity}</span>  */}
                           </div>
                         </div>
                       </div>
@@ -256,7 +256,7 @@ const ParentHomePage = () => {
                           <p className="text-xs text-gray-400">Points</p>
                         </div>
                         <p className="text-lg font-bold text-white">
-                          {child.points.toLocaleString()}
+                          {child.points}
                         </p>
                       </div>
 
@@ -265,12 +265,8 @@ const ParentHomePage = () => {
                           <Award className="w-4 h-4 text-purple-400" />
                           <p className="text-xs text-gray-400">Rank</p>
                         </div>
-                        <p
-                          className={`text-lg font-bold ${getRankColor(
-                            child.rank
-                          )}`}
-                        >
-                          #{child.rank}
+                        <p className={`text-lg font-bold ${child.Rank}`}>
+                          #{child.Rank}
                         </p>
                       </div>
                     </div>
@@ -284,11 +280,11 @@ const ParentHomePage = () => {
                         <Eye className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
                         <span>View Report</span>
                       </button>
-                      <div className="text-center">
+                      {/* <div className="text-center">
                         <p className="text-xs text-gray-400">
                           Favorite: {child.favoriteSubject || ""}
                         </p>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
