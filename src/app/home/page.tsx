@@ -1,22 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Play,
-  Clock,
-  Trophy,
-  Users,
-  BookOpen,
-  Star,
-  Calendar,
-  ArrowRight,
-  Filter,
-  Search,
-  Loader2,
-  Lock,
-  Globe,
-  UserRoundCog,
-} from "lucide-react";
+import { BookOpen, Search, Lock, UserRoundCog } from "lucide-react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -27,7 +12,6 @@ import {
 } from "@/store/slices/quizSlice";
 import Loading from "@/components/Loading";
 import { QuizCard } from "@/components/QuizCard";
-import Logo from "@/components/Logo";
 import { getUserInitial } from "@/lib/UserInitial";
 import BackButtonLogo from "@/components/BackButton-Logo";
 
@@ -119,29 +103,29 @@ export default function QuizHomePage() {
             {/* <Logo /> */}
 
             {/* Navigation Links (Optional - you can add more links here) */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-3">
               <Link
                 href="/"
-                className="px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300"
+                className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
               >
-                Home
+                <span className="font-semibold">Home</span>
               </Link>
 
               {!isAuthenticated ? (
                 <Link
                   href="/signin"
-                  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300"
+                  className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
                 >
-                  Sign In
+                  <span className="font-semibold">Sign In</span>
                 </Link>
               ) : (
                 <>
                   {user.role === "TEACHER" && (
                     <Link
                       href="/teacher/create-quiz"
-                      className="text-gray-300 hover:text-white transition-colors duration-300"
+                      className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
                     >
-                      Create Quiz
+                      <span className="font-semibold">Create Quiz</span>
                     </Link>
                   )}
                   <Link

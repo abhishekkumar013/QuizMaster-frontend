@@ -21,7 +21,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     "/teacher/quiz-report",
   ];
   const studentRoutes = ["/quiz/test", "/update-profile", "/student"];
-  const parentRoutes = ["/parent/home"];
+  const parentRoutes = ["/parent/home", "/parent/student-report"];
 
   const isPublicRoute = publicRoutes.some(
     (route) => route === pathname || pathname.startsWith(route + "/")
