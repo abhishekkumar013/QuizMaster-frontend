@@ -128,6 +128,14 @@ export default function QuizHomePage() {
                       <span className="font-semibold">Create Quiz</span>
                     </Link>
                   )}
+                  {user.role === "STUDENT" && (
+                    <Link
+                      href="/student/quiz/reports"
+                      className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                    >
+                      <span className="font-semibold">All Report</span>
+                    </Link>
+                  )}
                   <Link
                     href={`/update-profile/${user.id}`}
                     className="group w-auto px-4 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-md hover:scale-105 transition-transform duration-200 shadow-lg"

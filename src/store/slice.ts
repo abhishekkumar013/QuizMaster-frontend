@@ -3,6 +3,7 @@ import authReducer from "./slices/AuthSlice";
 import quizReducer from "./slices/quizslice";
 import categoryReducer from "./slices/categorySlice";
 import parentRoutes from "./slices/parentSlice";
+import studentReportRoutes from "./slices/studentSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     quiz: quizReducer,
     category: categoryReducer,
     parent: parentRoutes,
+    studentreport: studentReportRoutes,
   },
 });
 
