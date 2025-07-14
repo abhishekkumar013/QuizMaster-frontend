@@ -121,12 +121,20 @@ export default function QuizHomePage() {
               ) : (
                 <>
                   {user.role === "TEACHER" && (
-                    <Link
-                      href="/teacher/create-quiz"
-                      className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
-                    >
-                      <span className="font-semibold">Create Quiz</span>
-                    </Link>
+                    <>
+                      <Link
+                        href="/teacher/create-quiz"
+                        className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                      >
+                        <span className="font-semibold">Create Quiz</span>
+                      </Link>
+                      <Link
+                        href="/teacher/assign-quiz"
+                        className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                      >
+                        <span className="font-semibold">Assign Quiz</span>
+                      </Link>
+                    </>
                   )}
                   {user.role === "STUDENT" && (
                     <Link

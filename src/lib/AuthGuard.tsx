@@ -14,12 +14,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   );
 
   const publicRoutes = ["/", "/signin", "/signup", "/home"];
-  const teacherRoutes = [
-    "/teacher/create-quiz",
-    "/teacher/update-quiz",
-    "/update-profile",
-    "/teacher/quiz-report",
-  ];
+  const teacherRoutes = ["/teacher", "/update-profile"];
   const studentRoutes = ["/quiz/test", "/update-profile", "/student"];
   const parentRoutes = ["/parent/home", "/parent/student-report"];
 
