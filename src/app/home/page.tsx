@@ -130,7 +130,7 @@ export default function QuizHomePage() {
                   )}
                   {user.role === "STUDENT" && (
                     <Link
-                      href="/student/quiz/reports"
+                      href="/student/reports"
                       className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
                     >
                       <span className="font-semibold">All Report</span>

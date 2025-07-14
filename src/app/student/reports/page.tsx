@@ -12,6 +12,8 @@ import {
   Target,
   Trophy,
   Star,
+  Play,
+  ArrowLeft,
 } from "lucide-react";
 import {
   LineChart,
@@ -31,6 +33,8 @@ import { StudentReportCard } from "@/components/Student-Report-Card";
 import { GetAllReports } from "@/store/slices/studentSlice";
 import Loading from "@/components/Loading";
 import { GetCategory } from "@/store/slices/categorySlice";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // Generate performance data for charts
 const generatePerformanceData = (reports) => {
@@ -52,6 +56,7 @@ export default function StudentReports() {
   );
   const { category } = useSelector((state: RootState) => state.category);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("ALL");
@@ -116,7 +121,7 @@ export default function StudentReports() {
 
   const handleCardClick = (resultId) => {
     // Navigate to /student/report/resultId
-    window.location.href = `/student/report/${resultId}`;
+    router.push(`/student/reports/${resultId}`);
   };
 
   return (
@@ -126,6 +131,25 @@ export default function StudentReports() {
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
+
+      <nav className="relative z-10 p-6 flex justify-between items-center  backdrop-blur-md">
+        <div className="flex items-center space-x-2">
+          <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <Play className="w-6 h-6 text-white" />
+          </div>
+          <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+            QuizMaster
+          </span>
+        </div>
+
+        <Link
+          href={"/home"}
+          className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
+          <span className="font-semibold">Home</span>
+        </Link>
+      </nav>
 
       <div className="relative z-10 container mx-auto px-6 py-8">
         {/* Header */}

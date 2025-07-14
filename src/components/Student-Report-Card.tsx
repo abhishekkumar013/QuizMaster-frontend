@@ -1,4 +1,5 @@
 import { Calendar, ChevronRight, Clock } from "lucide-react";
+import Link from "next/link";
 
 export const StudentReportCard = ({ result, onClick }) => {
   const getDifficultyColor = (difficulty) => {
@@ -49,10 +50,7 @@ export const StudentReportCard = ({ result, onClick }) => {
   };
 
   return (
-    <div
-      onClick={() => onClick(result.id)}
-      className="group relative bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 p-6 hover:bg-white/15 transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-2xl"
-    >
+    <div className="group relative bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 p-6 hover:bg-white/15 transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-2xl">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
@@ -73,7 +71,11 @@ export const StudentReportCard = ({ result, onClick }) => {
             {getStatusBadge(result.isPassed)}
           </div>
         </div>
-        <div className="flex items-center text-white/60 group-hover:text-cyan-400 transition-colors">
+        <div
+          onClick={() => onClick(result.id)}
+          className="flex items-center text-white/60 group-hover:text-cyan-400 transition-colors"
+        >
+          <span>Details</span>
           <ChevronRight className="w-5 h-5" />
         </div>
       </div>
@@ -84,7 +86,7 @@ export const StudentReportCard = ({ result, onClick }) => {
           <div
             className={`text-3xl font-bold ${getScoreColor(result.percentage)}`}
           >
-            {result.percentage}%
+            {result.percentage.toFixed(2)}%
           </div>
           <div className="text-sm text-gray-400">Score</div>
         </div>
