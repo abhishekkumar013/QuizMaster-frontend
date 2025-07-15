@@ -204,59 +204,67 @@ const SignUpPage = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-300">
-                Parent Email <span className="text-pink-400">(Optional)</span>
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  name="parentEmail"
-                  value={formData.parentEmail}
-                  onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-300 text-white placeholder-gray-400"
-                  placeholder="Parent's email (for students)"
-                />
+            {formData.role === "STUDENT" && (
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-300">
+                  Parent Email <span className="text-pink-400">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="email"
+                    name="parentEmail"
+                    value={formData.parentEmail}
+                    onChange={handleInputChange}
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-300 text-white placeholder-gray-400"
+                    placeholder="Parent's email (for students)"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-300">
-                Phone Number <span className="text-pink-400">(Optional)</span>
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-300 text-white placeholder-gray-400"
-                  placeholder="Your phone number"
-                />
+            {(formData.role === "TEACHER" ||
+              formData.role === "ADMIN" ||
+              formData.role === "PARENT") && (
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-300">
+                  Phone Number <span className="text-pink-400">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-300 text-white placeholder-gray-400"
+                    placeholder="Your phone number"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-300">
-                Experience Years{" "}
-                <span className="text-pink-400">(Optional)</span>
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="number"
-                  name="experienceYears"
-                  value={formData.experienceYears}
-                  onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-300 text-white placeholder-gray-400"
-                  placeholder="Years of experience"
-                  min="0"
-                  max="50"
-                />
+            {formData.role === "TEACHER" && (
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-300">
+                  Experience Years{" "}
+                  <span className="text-pink-400">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="number"
+                    name="experienceYears"
+                    value={formData.experienceYears}
+                    onChange={handleInputChange}
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-300 text-white placeholder-gray-400"
+                    placeholder="Years of experience"
+                    min="0"
+                    max="50"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex items-center">
               <input
@@ -290,7 +298,7 @@ const SignUpPage = () => {
             </button>
           </div>
 
-          <div className="mt-8">
+          {/* <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-white/20"></div>
@@ -340,7 +348,7 @@ const SignUpPage = () => {
                 <span className="ml-2">GitHub</span>
               </button>
             </div>
-          </div>
+          </div> */}
 
           <div className="mt-8 text-center">
             <p className="text-gray-300 mb-4">

@@ -191,7 +191,7 @@ const SignInPage = () => {
             </button>
           </div>
 
-          <div className="mt-8">
+          {/* <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-white/20"></div>
@@ -241,7 +241,7 @@ const SignInPage = () => {
                 <span className="ml-2">GitHub</span>
               </button>
             </div>
-          </div>
+          </div> */}
 
           <div className="mt-8 text-center">
             <p className="text-gray-300 mb-4">
