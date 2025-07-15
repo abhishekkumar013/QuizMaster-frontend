@@ -304,7 +304,7 @@ const StudentReport = () => {
                     <div className="lg:col-span-1">
                       <div className="text-center mb-6">
                         <div className="text-5xl font-bold text-white mb-2">
-                          {result.percentage}%
+                          {result.percentage.toFixed(2)}%
                         </div>
                         <div className="text-gray-300">
                           {result.score}/{result.totalMarks} Points

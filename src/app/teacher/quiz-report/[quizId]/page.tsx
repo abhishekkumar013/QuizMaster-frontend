@@ -118,6 +118,12 @@ const QuizReport = () => {
     fullName: student.name,
   }));
 
+  const formatDuration = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
   const passRate =
     appearedStudents > 0 ? ((passed / appearedStudents) * 100).toFixed(1) : 0;
   const averagePercentage =
@@ -324,6 +330,9 @@ const QuizReport = () => {
                     Score
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">
+                    Time Taken
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">
                     Correct
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">
@@ -352,7 +361,12 @@ const QuizReport = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-bold text-white">
-                        {student.percentage}%
+                        {student.percentage.toFixed(2)}%
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-bold text-white">
+                        {formatDuration(student.timeTaken)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

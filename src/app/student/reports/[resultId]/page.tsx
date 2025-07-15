@@ -58,6 +58,11 @@ const DetailReportPage = () => {
       </div>
     );
   }
+  const formatDuration = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  };
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
@@ -178,7 +183,7 @@ const DetailReportPage = () => {
                 <Clock className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-white">
-                {result?.timeTaken} min
+                {formatDuration(result?.timeTaken)}
               </h3>
               <p className="text-gray-300">Time Taken</p>
             </div>
