@@ -276,7 +276,7 @@ export default function QuizHomePage() {
                     : "text-gray-300 hover:text-white"
                 }`}
               >
-                My Protected Quizzes ({filteredProtectedQuizzes.length})
+                My Draft Quizzes ({filteredProtectedQuizzes.length})
               </button>
             )}
           </div>

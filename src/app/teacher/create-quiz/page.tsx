@@ -34,6 +34,7 @@ export default function CreateQuizPage() {
   const { category } = categoryState;
 
   const [categories, setCategories] = useState([]);
+  const [defultMark, setDefaultMark] = useState(1);
 
   useEffect(() => {
     dispatch(GetCategory());
@@ -59,21 +60,25 @@ export default function CreateQuizPage() {
     status: "DRAFT",
   });
 
-  const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      text: "",
-      options: [
-        { text: "", isCorrect: false, order: 1 },
-        { text: "", isCorrect: false, order: 2 },
-      ],
-      score: 1,
-      marks: 1,
-      explanation: "",
-      order: 1,
-      isRequired: true,
-    },
-  ]);
+  const [questions, setQuestions] = useState([]);
+
+  useEffect(() => {
+    setQuestions([
+      {
+        id: 1,
+        text: "",
+        options: [
+          { text: "", isCorrect: false, order: 1 },
+          { text: "", isCorrect: false, order: 2 },
+        ],
+        score: defultMark,
+        marks: defultMark,
+        explanation: "",
+        order: 1,
+        isRequired: true,
+      },
+    ]);
+  }, []);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,6 +95,16 @@ export default function CreateQuizPage() {
       endTime: endTime.toISOString().slice(0, 16),
     }));
   }, []);
+
+  useEffect(() => {
+    setQuestions((prev) =>
+      prev.map((q) =>
+        q.score === defultMark || q.score === 1
+          ? { ...q, score: defultMark, marks: defultMark }
+          : q
+      )
+    );
+  }, [defultMark]);
 
   const handleInputChange = (field, value) => {
     console.log(field, "-", value);
@@ -115,8 +130,8 @@ export default function CreateQuizPage() {
         { text: "", isCorrect: false, order: 1 },
         { text: "", isCorrect: false, order: 2 },
       ],
-      score: 1,
-      marks: 1,
+      score: defultMark,
+      marks: defultMark,
       explanation: "",
       order: questions.length + 1,
       isRequired: true,
@@ -302,7 +317,7 @@ export default function CreateQuizPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (isDraft = false) => {
+  const handleSubmit = async (isDraft) => {
     setIsSubmitting(true);
 
     try {
@@ -573,6 +588,19 @@ export default function CreateQuizPage() {
                           {errors.maxAttempts}
                         </p>
                       )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
+                        <Target className="w-4 h-4 inline mr-1" />
+                        Default Marks *
+                      </label>
+                      <input
+                        type="number"
+                        value={defultMark}
+                        onChange={(e) => setDefaultMark(Number(e.target.value))}
+                        min="1"
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white"
+                      />
                     </div>
                   </div>
                 </div>
