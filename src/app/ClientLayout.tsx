@@ -6,12 +6,19 @@ import { ToastContainer } from "react-toastify";
 import { AppInitializer } from "@/lib/AuthStatus";
 import AuthGuard from "@/lib/AuthGuard";
 import "react-toastify/dist/ReactToastify.css";
+import { useEffect } from "react";
+import { generateToken, listenToMessages } from "@/lib/Notification";
 
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    generateToken();
+    listenToMessages();
+  }, []);
+
   return (
     <Provider store={store}>
       <AppInitializer />
