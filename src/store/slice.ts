@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
-import quizReducer from "./slices/quizslice";
+import quizReducer from "./slices/quizSlice";
 import categoryReducer from "./slices/categorySlice";
 import parentRoutes from "./slices/parentSlice";
 import studentReportRoutes from "./slices/studentSlice";
