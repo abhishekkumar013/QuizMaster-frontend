@@ -55,7 +55,9 @@ const QuizTakingComponent = () => {
       socket.disconnect();
     }
 
-    socket = io("http://localhost:4040", {
+    const SOCKET_URL = process.env.NEXT_PUBLIC_API_BACKEND_SOCKET;
+
+    socket = io(SOCKET_URL, {
       withCredentials: true,
       forceNew: true, // Force a new connection
     });
