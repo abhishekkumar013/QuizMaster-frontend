@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { SingUp } from "@/store/slices/AuthSlice";
+import { SingUp } from "@/store/slices/authSlice";
 import { toast } from "react-toastify";
 import { useRedirectIfAuthenticated } from "@/lib/redirectAuthenciated";
 

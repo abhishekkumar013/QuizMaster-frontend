@@ -5,7 +5,7 @@ import { Play, Mail, Lock, Eye, EyeOff, UserCheck } from "lucide-react";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Login } from "@/store/slices/AuthSlice";
+import { Login } from "@/store/slices/authSlice";
 import { toast } from "react-toastify";
 import { useRedirectIfAuthenticated } from "@/lib/redirectAuthenciated";
 
