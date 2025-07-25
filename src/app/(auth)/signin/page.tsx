@@ -245,7 +245,7 @@ const SignInPage = () => {
 
           <div className="mt-8 text-center">
             <p className="text-gray-300 mb-4">
-              Don't have an account?{" "}
+              Don&#39;t have an account?
               <Link
                 href="/signup"
                 className="text-pink-400 hover:text-pink-300 font-semibold transition-colors duration-300"

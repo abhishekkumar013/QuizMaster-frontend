@@ -70,9 +70,9 @@ const SignUpPage = () => {
     { value: "PARENT", label: "Parent" },
   ];
 
-  const isOptionalField = (fieldName) => {
-    return ["parentEmail", "phone", "experienceYears"].includes(fieldName);
-  };
+  // const isOptionalField = (fieldName) => {
+  //   return ["parentEmail", "phone", "experienceYears"].includes(fieldName);
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white flex items-center justify-center p-6">

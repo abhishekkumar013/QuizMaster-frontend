@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, UpdateUser } from "@/store/slices/authSlice";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import HeaderBar from "@/components/HeaderBar";

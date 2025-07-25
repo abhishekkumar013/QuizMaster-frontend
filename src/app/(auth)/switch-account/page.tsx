@@ -1,13 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import {
-  Play,
-  Mail,
-  UserCheck,
-  ArrowLeft,
-  Users,
-  RefreshCw,
-} from "lucide-react";
+import { Mail, UserCheck, ArrowLeft, Users, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -47,7 +40,8 @@ const SwitchAccountPage = () => {
       }
     } catch (error) {
       toast.error(
-        "An error occurred while switching accounts. Please try again later."
+        error.response.data.message ||
+          "An error occurred while switching accounts. Please try again later."
       );
     } finally {
       setIsLoading(false);
