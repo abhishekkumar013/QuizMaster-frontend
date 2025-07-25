@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "@/lib/axios";
+import { AppDispatch } from "../slice";
 
 type ChidrenPayload = {
   childrens: any[];
@@ -39,7 +40,7 @@ export const { setChildren, setChildrenfailed, setLoading } =
 
 export default parentSlice.reducer;
 
-export const GetChildrens = () => async (dispatch: any) => {
+export const GetChildrens = () => async (dispatch: AppDispatch) => {
   dispatch(setLoading(true));
 
   try {

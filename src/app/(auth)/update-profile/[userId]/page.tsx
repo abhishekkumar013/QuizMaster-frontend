@@ -7,15 +7,17 @@ import { RootState, UpdateUser } from "@/store/slices/authSlice";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import HeaderBar from "@/components/HeaderBar";
+import { AppDispatch } from "@/store/slice";
+import { UpdateFormData } from "@/utlis/types";
 
 export default function UpdateProfilePage() {
   const { userId } = useParams();
   const router = useRouter();
   const { user, loading } = useSelector((state: RootState) => state.auth);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<UpdateFormData>({
     name: "",
     email: "",
     role: "",

@@ -18,14 +18,16 @@ import { useRouter } from "next/navigation";
 import { SingUp } from "@/store/slices/authSlice";
 import { toast } from "react-toastify";
 import { useRedirectIfAuthenticated } from "@/lib/redirectAuthenciated";
+import { AppDispatch } from "@/store/slice";
+import { SignupFormData } from "@/utlis/types";
 
 const SignUpPage = () => {
   useRedirectIfAuthenticated();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SignupFormData>({
     name: "",
     email: "",
     password: "",

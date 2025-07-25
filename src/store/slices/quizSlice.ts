@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "@/lib/axios";
+import { AppDispatch } from "../slice";
 
 type QuizPayload = {
   quiz: any[];
@@ -58,7 +59,7 @@ export const {
 
 export default quizSlice.reducer;
 
-export const GetPublicQuiz = () => async (dispatch: any) => {
+export const GetPublicQuiz = () => async (dispatch: AppDispatch) => {
   dispatch(setLoading(true));
 
   try {
@@ -79,7 +80,7 @@ export const GetPublicQuiz = () => async (dispatch: any) => {
     dispatch(setLoading(false));
   }
 };
-export const GetQuiz = () => async (dispatch: any) => {
+export const GetQuiz = () => async (dispatch: AppDispatch) => {
   dispatch(setLoading(true));
 
   try {
@@ -106,7 +107,7 @@ export const GetQuiz = () => async (dispatch: any) => {
   }
 };
 
-export const GetTeacherQuiz = () => async (dispatch: any) => {
+export const GetTeacherQuiz = () => async (dispatch: AppDispatch) => {
   dispatch(setLoading(true));
   try {
     const res = await axios.get("/quiz/own-quiz");

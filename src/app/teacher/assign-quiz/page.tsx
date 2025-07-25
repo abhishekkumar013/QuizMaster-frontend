@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Search, Lock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/slice";
+import { AppDispatch, RootState } from "@/store/slice";
 import { GetTeacherQuiz } from "@/store/slices/quizSlice";
 import Loading from "@/components/Loading";
 import BackButtonLogo from "@/components/BackButton-Logo";
@@ -12,7 +12,7 @@ import { GetCategory } from "@/store/slices/categorySlice";
 import { AssignQuizCard } from "@/components/AssignQuiz-Card";
 
 export default function QuizHomePage() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );

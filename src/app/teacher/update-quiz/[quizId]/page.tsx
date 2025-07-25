@@ -26,9 +26,10 @@ import { GetCategory } from "@/store/slices/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import BackButtonLogo from "@/components/BackButton-Logo";
 import { useParams, useRouter } from "next/navigation";
+import { AppDispatch } from "@/store/slice";
 
 export default function UpdateQuizPage() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const params = useParams();
   const quizId = params.quizId;
 

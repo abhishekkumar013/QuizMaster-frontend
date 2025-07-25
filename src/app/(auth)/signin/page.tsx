@@ -8,14 +8,16 @@ import { useRouter } from "next/navigation";
 import { Login } from "@/store/slices/authSlice";
 import { toast } from "react-toastify";
 import { useRedirectIfAuthenticated } from "@/lib/redirectAuthenciated";
+import { AppDispatch } from "@/store/slice";
+import { SigninFormData } from "@/utlis/types";
 
 const SignInPage = () => {
   useRedirectIfAuthenticated();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SigninFormData>({
     email: "",
     password: "",
     role: "",

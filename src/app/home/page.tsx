@@ -14,6 +14,7 @@ import Loading from "@/components/Loading";
 import { QuizCard } from "@/components/QuizCard";
 import { getUserInitial } from "@/lib/UserInitial";
 import BackButtonLogo from "@/components/BackButton-Logo";
+import { AppDispatch } from "@/store/slice";
 
 interface Category {
   id: string;
@@ -27,7 +28,7 @@ interface CreatedBy {
 }
 
 export default function QuizHomePage() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );

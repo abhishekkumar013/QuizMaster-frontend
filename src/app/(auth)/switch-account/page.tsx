@@ -6,10 +6,10 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { switchAccont } from "@/store/slices/authSlice";
 import { useRouter } from "next/navigation";
-import { RootState } from "@/store/slice";
+import { AppDispatch, RootState } from "@/store/slice";
 
 const SwitchAccountPage = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
   const { user } = useSelector((state: RootState) => state.auth);

@@ -26,7 +26,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { RootState } from "@/store/slice";
+import { AppDispatch, RootState } from "@/store/slice";
 import { useDispatch, useSelector } from "react-redux";
 import { AnalyticsCard } from "@/components/AnalyticsCard";
 import { StudentReportCard } from "@/components/Student-Report-Card";
@@ -55,7 +55,7 @@ export default function StudentReports() {
     (state: RootState) => state.studentreport
   );
   const { category } = useSelector((state: RootState) => state.category);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");

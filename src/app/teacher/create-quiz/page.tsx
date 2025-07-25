@@ -25,9 +25,10 @@ import { RootState } from "@/store";
 import { GetCategory } from "@/store/slices/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import BackButtonLogo from "@/components/BackButton-Logo";
+import { AppDispatch } from "@/store/slice";
 
 export default function CreateQuizPage() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   // Mock categories for demonstration
   const categoryState = useSelector((state: RootState) => state.category);

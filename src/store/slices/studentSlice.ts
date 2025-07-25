@@ -1,6 +1,7 @@
 import axios from "@/lib/axios";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
+import { AppDispatch } from "../slice";
 
 type StudentReportPayload = {
   reports: any[];
@@ -38,7 +39,7 @@ export const { setAllReport, setReportFailed, setLoading } =
 
 export default studentReportSlice.reducer;
 
-export const GetAllReports = () => async (dispatch: any) => {
+export const GetAllReports = () => async (dispatch: AppDispatch) => {
   dispatch(setLoading(true));
   try {
     const res = await axios.get("/result/all");

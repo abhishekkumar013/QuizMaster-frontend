@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "@/lib/axios";
+import { AppDispatch } from "../slice";
 
 type CategoryPayload = {
   category: any[];
@@ -39,7 +40,7 @@ export const { setCategooryfailed, setCategory, setLoading } =
 
 export default categorySlice.reducer;
 
-export const GetCategory = () => async (dispatch: any) => {
+export const GetCategory = () => async (dispatch: AppDispatch) => {
   dispatch(setLoading(true));
 
   try {

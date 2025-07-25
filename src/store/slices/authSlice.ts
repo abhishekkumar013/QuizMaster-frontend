@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "@/lib/axios";
+import { AppDispatch } from "../slice";
+import { SigninFormData, SignupFormData, UpdateFormData } from "@/utlis/types";
 
 type AuthPayload = {
   user: any;
@@ -72,7 +74,7 @@ export const {
 
 export default authSlice.reducer;
 
-export const CheckLoginStatus = () => async (dispatch: any) => {
+export const CheckLoginStatus = () => async (dispatch: AppDispatch) => {
   dispatch(setLoading(true));
 
   try {
@@ -98,42 +100,44 @@ export const CheckLoginStatus = () => async (dispatch: any) => {
   }
 };
 
-export const SingUp = (formData: any) => async (dispatch: any) => {
-  try {
-    const res = await axios.post("/auth/users/signup", formData);
-    return res.data;
-  } catch (error) {
-    // console.error("Error during signup:", error);
-    return error.response?.data || null;
-  }
-};
-
-export const Login = (formData: any) => async (dispatch: any) => {
-  try {
-    const res = await axios.post("/auth/users/signin", formData);
-
-    if (res.data.success) {
-      const { token, ...userWithoutToken } = res.data.data;
-
-      dispatch(
-        loginSuccess({
-          user: userWithoutToken,
-          token: token,
-        })
-      );
+export const SingUp =
+  (formData: SignupFormData) => async (dispatch: AppDispatch) => {
+    try {
+      const res = await axios.post("/auth/users/signup", formData);
       return res.data;
-    } else {
-      dispatch(loginFailed());
-      return null;
+    } catch (error) {
+      // console.error("Error during signup:", error);
+      return error.response?.data || null;
     }
-  } catch (error) {
-    // console.error("Error during login:", error.response?.data);
-    dispatch(loginFailed());
-    return error.response?.data || null;
-  }
-};
+  };
 
-export const logoutUser = () => async (dispatch) => {
+export const Login =
+  (formData: SigninFormData) => async (dispatch: AppDispatch) => {
+    try {
+      const res = await axios.post("/auth/users/signin", formData);
+
+      if (res.data.success) {
+        const { token, ...userWithoutToken } = res.data.data;
+
+        dispatch(
+          loginSuccess({
+            user: userWithoutToken,
+            token: token,
+          })
+        );
+        return res.data;
+      } else {
+        dispatch(loginFailed());
+        return null;
+      }
+    } catch (error) {
+      // console.error("Error during login:", error.response?.data);
+      dispatch(loginFailed());
+      return error.response?.data || null;
+    }
+  };
+
+export const logoutUser = () => async (dispatch: AppDispatch) => {
   try {
     const res = await axios.post("/auth/users/signout");
 
@@ -147,51 +151,56 @@ export const logoutUser = () => async (dispatch) => {
   }
 };
 
-export const switchAccont = (formData: any) => async (dispatch: any) => {
-  try {
-    const res = await axios.post("/auth/users/switch-role", formData);
-    console.log("Switch Account Response:", res);
+export const switchAccont =
+  (formData: any) => async (dispatch: AppDispatch) => {
+    try {
+      const res = await axios.post("/auth/users/switch-role", formData);
+      console.log("Switch Account Response:", res);
 
-    if (res.data.success) {
-      const user = res.data.data;
+      if (res.data.success) {
+        const user = res.data.data;
 
-      dispatch(
-        updateProfile({
-          user: user,
-        })
-      );
-      return res.data;
-    } else {
+        dispatch(
+          updateProfile({
+            user: user,
+          })
+        );
+        return res.data;
+      } else {
+        dispatch(updateProfileFailed());
+        return null;
+      }
+    } catch (error) {
       dispatch(updateProfileFailed());
-      return null;
+      return error.response?.data || null;
     }
-  } catch (error) {
-    dispatch(updateProfileFailed());
-    return error.response?.data || null;
-  }
-};
+  };
 
-export const UpdateUser = (formData: any) => async (dispatch: any) => {
-  try {
-    console.log(formData.id);
-    const res = await axios.put(`/auth/users/update/${formData.id}`, formData);
-    // console.log("R", res);
-    if (res.data.success) {
-      const user = res.data.data;
-
-      dispatch(
-        updateProfile({
-          user: user,
-        })
+export const UpdateUser =
+  (formData: UpdateFormData) => async (dispatch: AppDispatch) => {
+    try {
+      console.log(formData.id);
+      const res = await axios.put(
+        `/auth/users/update/${formData.id}`,
+        formData
       );
-      return res.data;
-    } else {
+      // console.log("R", res);
+      if (res.data.success) {
+        const user = res.data.data;
+
+        dispatch(
+          updateProfile({
+            user: user,
+          })
+        );
+        return res.data;
+      } else {
+        dispatch(updateProfileFailed());
+        return null;
+      }
+    } catch (error) {
+      console.log("Error ->", error.response);
       dispatch(updateProfileFailed());
-      return null;
+      return error.response?.data || null;
     }
-  } catch (error) {
-    console.log("Error ->", error.response);
-    dispatch(updateProfileFailed());
-    return error.response?.data || null;
-  }
-};
+  };

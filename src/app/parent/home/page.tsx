@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Play, User, Users, Activity, TrendingUp } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/slice";
+import { AppDispatch, RootState } from "@/store/slice";
 import { GetChildrens } from "@/store/slices/parentSlice";
 import ChildrenCard from "@/components/Children-Card";
 import Loading from "@/components/Loading";
@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 const ParentHomePage = () => {
   const router = useRouter();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { childrens, loading } = useSelector(
     (state: RootState) => state.parent
   );
