@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { BookOpen, Search, Lock, UserRoundCog } from "lucide-react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { RootState } from "@/store/slice";
 import {
   GetPublicQuiz,
   GetQuiz,
@@ -32,6 +32,8 @@ export default function QuizHomePage() {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
+
+  const { category } = useSelector((state: RootState) => state.category);
   const quizState = useSelector((state: RootState) => state.quiz);
   const {
     publicQuiz = [],
@@ -45,6 +47,7 @@ export default function QuizHomePage() {
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [activeTab, setActiveTab] = useState("public");
 
+  // console.log("user", user);
   useEffect(() => {
     if (isAuthenticated === false) {
       dispatch(GetPublicQuiz());
@@ -55,12 +58,12 @@ export default function QuizHomePage() {
     }
   }, [dispatch, isAuthenticated]);
 
-  const getUniqueCategories = (quizzes: Quiz[]) => {
+  const getUniqueCategories = (quizzes) => {
     const categories = quizzes.map((quiz) => quiz.category.name);
     return [...new Set(categories)];
   };
 
-  const filterQuizzes = (quizzes: Quiz[]) => {
+  const filterQuizzes = (quizzes) => {
     return quizzes.filter((quiz) => {
       const matchesSearch = quiz.title
         .toLowerCase()
@@ -85,7 +88,10 @@ export default function QuizHomePage() {
     ...(privateQuiz || []),
     ...(protectedQuiz || []),
   ];
-  const categories = getUniqueCategories(allQuizzes);
+  const categories = category;
+
+  console.log("Quiz ", allQuizzes);
+  console.log("cat", categories);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
@@ -231,11 +237,11 @@ export default function QuizHomePage() {
                 </option>
                 {categories.map((category) => (
                   <option
-                    key={category}
-                    value={category}
+                    key={category.id}
+                    value={category.name}
                     className="bg-gray-800 text-white"
                   >
-                    {category}
+                    {category.name}
                   </option>
                 ))}
               </select>

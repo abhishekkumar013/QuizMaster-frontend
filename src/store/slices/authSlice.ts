@@ -1,7 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "@/lib/axios";
 import { AppDispatch } from "../slice";
-import { SigninFormData, SignupFormData, UpdateFormData } from "@/utlis/types";
+import {
+  AuthUser,
+  SigninFormData,
+  SignupFormData,
+  UpdateFormData,
+} from "@/utlis/types";
 
 type AuthPayload = {
   user: any;
@@ -10,7 +15,7 @@ type AuthPayload = {
 
 type AuthState = {
   isAuthenticated: boolean;
-  user: object | null;
+  user: AuthUser | null;
   token: string | null;
   loading: boolean;
 };

@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import axios from "@/lib/axios";
 import { toast } from "react-toastify";
-import { RootState } from "@/store";
+import { RootState } from "@/store/slice";
 import { GetCategory } from "@/store/slices/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import BackButtonLogo from "@/components/BackButton-Logo";

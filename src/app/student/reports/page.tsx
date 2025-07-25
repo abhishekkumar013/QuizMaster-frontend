@@ -95,7 +95,7 @@ export default function StudentReports() {
 
   // Calculate analytics based on actual data
   const calculateAnalytics = () => {
-    if (!allReport || allReport.length === 0) {
+    if (!allReport || allReport.results.length === 0) {
       return {
         averageScore: 0,
         averageRank: 0,
@@ -104,7 +104,11 @@ export default function StudentReports() {
       };
     }
 
-    const averageRank = allReport?.rank;
+    //TODO previoouly rank is  allReport?.rank;
+    const averageRank = Math.round(
+      allReport.results.reduce((sum, r) => sum + (r.rank || 0), 0) /
+        allReport.results.length
+    );
 
     const totalQuizzes = allReport.results.length;
     const bestScore = Math.max(...allReport.results.map((r) => r.percentage));

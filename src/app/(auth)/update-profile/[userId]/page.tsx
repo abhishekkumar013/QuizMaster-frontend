@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, UpdateUser } from "@/store/slices/authSlice";
+import { UpdateUser } from "@/store/slices/authSlice";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import HeaderBar from "@/components/HeaderBar";
-import { AppDispatch } from "@/store/slice";
+import { AppDispatch, RootState } from "@/store/slice";
 import { UpdateFormData } from "@/utlis/types";
 
 export default function UpdateProfilePage() {
@@ -23,7 +23,7 @@ export default function UpdateProfilePage() {
     role: "",
     parentEmail: "",
     phone: "",
-    experienceYears: "",
+    experienceYears: 0,
     id: "",
   });
 
@@ -40,7 +40,8 @@ export default function UpdateProfilePage() {
         role: user?.role || "",
         parentEmail: user?.parentDetail?.user?.email || user?.parentEmail || "",
         phone: user?.phone || "",
-        experienceYears: user?.experienceYears?.toString() || "",
+        experienceYears: user?.experienceYears || 0,
+        id: user?.id || "",
       });
 
       if (user?.role === "STUDENT" && user?.parent?.email) {

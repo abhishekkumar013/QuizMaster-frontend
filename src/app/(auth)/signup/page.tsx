@@ -34,7 +34,7 @@ const SignUpPage = () => {
     role: "",
     parentEmail: "",
     phone: "",
-    experienceYears: "",
+    experienceYears: 0,
   });
 
   const handleInputChange = (e) => {
@@ -57,7 +57,7 @@ const SignUpPage = () => {
         role: "",
         parentEmail: "",
         phone: "",
-        experienceYears: "",
+        experienceYears: 0,
       });
     } else {
       toast.error(res?.message);

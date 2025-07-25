@@ -35,7 +35,7 @@ export default function QuizHomePage() {
     setCategories(category);
   }, [dispatch, isAuthenticated]);
 
-  const filterQuizzes = (quizzes: Quiz[]) => {
+  const filterQuizzes = (quizzes) => {
     return quizzes.filter((quiz) => {
       const matchesSearch = quiz.title
         .toLowerCase()

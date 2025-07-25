@@ -2,17 +2,18 @@ import axios from "@/lib/axios";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import { AppDispatch } from "../slice";
+import { AllReportResponse } from "@/utlis/types";
 
 type StudentReportPayload = {
-  reports: any[];
+  reports: AllReportResponse;
 };
 
 type StudentReportState = {
-  allReport: any[];
+  allReport: AllReportResponse;
   loading: boolean;
 };
 const initialState: StudentReportState = {
-  allReport: [],
+  allReport: null,
   loading: true,
 };
 

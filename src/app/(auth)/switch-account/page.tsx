@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Mail, UserCheck, ArrowLeft, Users, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { toast } from "react-toastify";
@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { switchAccont } from "@/store/slices/authSlice";
 import { useRouter } from "next/navigation";
 import { AppDispatch, RootState } from "@/store/slice";
+import { SwitchAccounFormData } from "@/utlis/types";
 
 const SwitchAccountPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -14,10 +15,19 @@ const SwitchAccountPage = () => {
 
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const [formData, setFormData] = useState({
-    email: user.email,
+  const [formData, setFormData] = useState<SwitchAccounFormData>({
+    email: "",
     targetRole: "",
   });
+  useEffect(() => {
+    if (user?.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email,
+      }));
+    }
+  }, []);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e) => {

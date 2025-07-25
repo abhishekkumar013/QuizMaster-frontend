@@ -64,7 +64,7 @@ export const GetPublicQuiz = () => async (dispatch: AppDispatch) => {
 
   try {
     const res = await axios.get("/quiz/public");
-
+    console.log("res pub", res.data);
     if (res.data.success) {
       dispatch(
         setPublicQuiz({
