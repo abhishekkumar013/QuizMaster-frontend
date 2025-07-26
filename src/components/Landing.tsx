@@ -15,19 +15,20 @@ import {
   SwitchCamera,
 } from "lucide-react";
 import Link from "next/link";
-import { logoutUser, RootState } from "@/store/slices/authSlice";
+import { logoutUser } from "@/store/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import swap from "@/assests/swap.png";
 import { getUserInitial } from "@/lib/UserInitial";
+import { AppDispatch, RootState } from "@/store/slice";
 
 export default function QuizLandingPage() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
-  const [isVisible, setIsVisible] = useState(true); // Start with true to match server
+  const [isVisible, setIsVisible] = useState(true);
   const [activeFeature, setActiveFeature] = useState(0);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -158,7 +159,7 @@ export default function QuizLandingPage() {
                 <div className="p-4 border-b border-white/10">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                      {getUserInitial()}
+                      {getUserInitial(user)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-semibold truncate">

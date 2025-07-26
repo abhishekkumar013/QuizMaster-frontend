@@ -1,3 +1,15 @@
+interface Category {
+  id: string;
+  name: string;
+}
+interface CreatedBy {
+  id: string;
+  user: {
+    id?: string;
+    name: string;
+    email: string;
+  };
+}
 export interface Quiz {
   id: string;
   title: string;
@@ -10,6 +22,7 @@ export interface Quiz {
   maxAttempts: number;
   startTime: string;
   endTime: string;
+  isReachMaxAttempt?: boolean;
   category: Category;
   createdBy: CreatedBy;
 }

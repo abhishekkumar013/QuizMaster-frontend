@@ -34,6 +34,15 @@ interface User {
   name: string;
 }
 
+interface User2 {
+  id: string;
+  user: {
+    id?: string;
+    email: string;
+    name: string;
+  };
+}
+
 export const AssignQuizCard = ({
   quiz,
   teacherId,
@@ -44,8 +53,8 @@ export const AssignQuizCard = ({
   const isActive = isQuizActive(quiz.startTime, quiz.endTime);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchEmail, setSearchEmail] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
-  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User2[]>([]);
+  const [searchResults, setSearchResults] = useState<User2[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
@@ -76,7 +85,7 @@ export const AssignQuizCard = ({
   };
 
   //  add user to selected list
-  const addUserToSelected = (user: User) => {
+  const addUserToSelected = (user: User2) => {
     if (!selectedUsers.find((u) => u.id === user.id)) {
       setSelectedUsers([...selectedUsers, user]);
     }

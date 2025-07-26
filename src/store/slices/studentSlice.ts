@@ -27,9 +27,14 @@ const studentReportSlice = createSlice({
       state.loading = false;
     },
     setReportFailed(state) {
-      state.allReport = [];
+      state.allReport = {
+        rank: 0,
+        points: 0,
+        results: [],
+      };
       state.loading = false;
     },
+
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload;
     },

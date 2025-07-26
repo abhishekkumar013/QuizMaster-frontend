@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { RootState } from "@/store/slices/authSlice";
+import { RootState } from "@/store/slice";
 
 export const useRedirectIfAuthenticated = () => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);

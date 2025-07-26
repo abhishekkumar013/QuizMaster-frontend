@@ -21,12 +21,21 @@ import {
 } from "lucide-react";
 import axios from "@/lib/axios";
 import { toast } from "react-toastify";
-import { RootState } from "@/store";
+import { RootState } from "@/store/slice";
 import { GetCategory } from "@/store/slices/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import BackButtonLogo from "@/components/BackButton-Logo";
 import { useParams, useRouter } from "next/navigation";
 import { AppDispatch } from "@/store/slice";
+import {
+  AllErrorsType,
+  CategoryType,
+  CreateFormDataType,
+  FormErrorsType,
+  QuestionErrorsType,
+  UpdateQuestionType,
+} from "@/utlis/types";
+import { QuizType } from "@/utlis/Quiz-Types";
 
 export default function UpdateQuizPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -38,8 +47,8 @@ export default function UpdateQuizPage() {
   const categoryState = useSelector((state: RootState) => state.category);
   const { category } = categoryState;
 
-  const [categories, setCategories] = useState([]);
-  const [quiz, setQuiz] = useState();
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [quiz, setQuiz] = useState<QuizType>();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,10 +71,9 @@ export default function UpdateQuizPage() {
     setCategories(category);
   }, [category]);
 
-  console.log(quiz);
+  // console.log(quiz);
 
-  // Replace your current formData initialization with this:
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateFormDataType>({
     title: "",
     description: "",
     instructions: "",
@@ -80,7 +88,14 @@ export default function UpdateQuizPage() {
     endTime: "",
     status: "DRAFT",
   });
-  const [questions, setQuestions] = useState(quiz?.questions);
+  // console.log("Q", quiz?.questions);
+  const [questions, setQuestions] = useState<UpdateQuestionType[]>([]);
+
+  useEffect(() => {
+    if (quiz?.questions) {
+      setQuestions(quiz.questions);
+    }
+  }, [quiz]);
 
   useEffect(() => {
     if (quiz) {
@@ -122,9 +137,9 @@ export default function UpdateQuizPage() {
     }
   }, [quiz]);
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errors, setErrors] = useState<AllErrorsType>({});
 
   useEffect(() => {
     if (!quiz?.startTime || !quiz?.endTime) return;
@@ -161,11 +176,11 @@ export default function UpdateQuizPage() {
 
   const addQuestion = () => {
     const newQuestion = {
-      id: questions.length + 1,
+      id: (questions.length + 1).toString(),
       text: "",
       options: [
-        { text: "", isCorrect: false, order: 1 },
-        { text: "", isCorrect: false, order: 2 },
+        { id: "", text: "", isCorrect: false, order: 1 },
+        { id: "", text: "", isCorrect: false, order: 2 },
       ],
       score: 1,
       marks: 1,
@@ -230,7 +245,12 @@ export default function UpdateQuizPage() {
               ...q,
               options: [
                 ...q.options,
-                { text: "", isCorrect: false, order: q.options.length + 1 },
+                {
+                  id: "",
+                  text: "",
+                  isCorrect: false,
+                  order: q.options.length + 1,
+                },
               ],
             }
           : q
@@ -259,7 +279,7 @@ export default function UpdateQuizPage() {
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: FormErrorsType = {};
 
     // Required field validations matching controller
     if (!formData.title.trim()) newErrors.title = "Title is required";
@@ -288,7 +308,7 @@ export default function UpdateQuizPage() {
   };
 
   const validateQuestions = () => {
-    const newErrors = {};
+    const newErrors: QuestionErrorsType = {};
 
     if (questions.length === 0) {
       newErrors.questions = "At least one question is required";

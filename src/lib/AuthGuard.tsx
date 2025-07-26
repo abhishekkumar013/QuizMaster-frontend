@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
-import { RootState } from "@/store/slices/authSlice";
+import { RootState } from "@/store/slice";
 import Loading from "@/components/Loading";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {

@@ -26,6 +26,14 @@ import { GetCategory } from "@/store/slices/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
 import BackButtonLogo from "@/components/BackButton-Logo";
 import { AppDispatch } from "@/store/slice";
+import {
+  AllErrorsType,
+  CategoryType,
+  CreateFormDataType,
+  FormErrorsType,
+  QuestionErrorsType,
+  QuestionType,
+} from "@/utlis/types";
 
 export default function CreateQuizPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,8 +42,8 @@ export default function CreateQuizPage() {
   const categoryState = useSelector((state: RootState) => state.category);
   const { category } = categoryState;
 
-  const [categories, setCategories] = useState([]);
-  const [defultMark, setDefaultMark] = useState(1);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [defultMark, setDefaultMark] = useState<number>(1);
 
   useEffect(() => {
     dispatch(GetCategory());
@@ -45,7 +53,7 @@ export default function CreateQuizPage() {
     setCategories(category);
   }, [category]);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateFormDataType>({
     title: "",
     description: "",
     instructions: "",
@@ -61,7 +69,7 @@ export default function CreateQuizPage() {
     status: "DRAFT",
   });
 
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState<QuestionType[]>([]);
 
   useEffect(() => {
     setQuestions([
@@ -79,16 +87,16 @@ export default function CreateQuizPage() {
         isRequired: true,
       },
     ]);
-  }, []);
+  }, [defultMark]);
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errors, setErrors] = useState<AllErrorsType>({});
 
   useEffect(() => {
     const now = new Date();
-    const startTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
-    const endTime = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 1 week from now
+    const startTime = new Date(now.getTime() + 60 * 60 * 1000);
+    const endTime = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
     setFormData((prev) => ({
       ...prev,
@@ -114,7 +122,6 @@ export default function CreateQuizPage() {
       [field]: value,
     }));
 
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({
         ...prev,
@@ -223,9 +230,8 @@ export default function CreateQuizPage() {
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: FormErrorsType = {};
 
-    // Required field validations matching controller
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.categoryId || formData.categoryId.trim() === "") {
       newErrors.categoryId = "Category is required";
@@ -242,7 +248,6 @@ export default function CreateQuizPage() {
       newErrors.maxAttempts = "Max attempts must be greater than 0";
     }
 
-    // Time validation
     if (new Date(formData.startTime) >= new Date(formData.endTime)) {
       newErrors.endTime = "End time must be after start time";
     }
@@ -252,7 +257,7 @@ export default function CreateQuizPage() {
   };
 
   const validateQuestions = () => {
-    const newErrors = {};
+    const newErrors: QuestionErrorsType = {};
 
     if (questions.length === 0) {
       newErrors.questions = "At least one question is required";
