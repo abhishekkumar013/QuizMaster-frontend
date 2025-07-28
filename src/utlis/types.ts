@@ -158,3 +158,22 @@ export type UpdateQuestionType = {
   score: number;
   options: OptionType2[];
 };
+
+
+
+export interface RoomType{
+  id: string;
+  quizId: string;
+  teacherId: string;
+  roomCode: string;
+  title: string;
+  startTime: string; 
+  endTime: string;   
+  showReport: boolean;
+  createdAt: string; 
+  updatedAt: string; 
+  quiz: {
+    title: string;
+  };
+  isActive: boolean;
+};

@@ -4,6 +4,7 @@ import quizReducer from "./slices/quizSlice";
 import categoryReducer from "./slices/categorySlice";
 import parentRoutes from "./slices/parentSlice";
 import studentReportRoutes from "./slices/studentSlice";
+import RoomReducer from "./slices/roomSlice"
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     category: categoryReducer,
     parent: parentRoutes,
     studentreport: studentReportRoutes,
+    room:RoomReducer
   },
 });
 

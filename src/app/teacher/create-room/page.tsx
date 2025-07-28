@@ -24,6 +24,8 @@ import { GetCategory } from "@/store/slices/categorySlice";
 import { CategoryType } from "@/utlis/types";
 import Loading from "@/components/Loading";
 import axios from "@/lib/axios";
+import { GetRoom } from "@/store/slices/roomSlice";
+import { RoomCard } from "@/components/RoomCard";
 
 export default function QuizSelectionPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -45,14 +47,20 @@ export default function QuizSelectionPage() {
   const [showReport, setShowReport] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [activeTab, setActiveTab] = useState("quiz");
+  const [roomSearchTerm, setRoomSearchTerm] = useState("");
+
 
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { privateQuiz, publicQuiz } = useSelector((state: RootState) => state.quiz);
-  const { category } = useSelector((state: RootState) => state.category);
+  const {rooms,loading:roomCardLoading}=useSelector((state: RootState)=>state.room)
 
+  const { category } = useSelector((state: RootState) => state.category);
+  
+  
   useEffect(() => {
     dispatch(GetTeacherQuiz());
     dispatch(GetCategory());
+    dispatch(GetRoom())
   }, []);
 
   useEffect(() => {
@@ -70,9 +78,9 @@ export default function QuizSelectionPage() {
 
   const filteredQuizzes = useMemo(() => {
     return quizzes.filter(quiz => {
-      const matchesSearch = quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quiz.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        quiz.category.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = quiz.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        quiz.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        quiz.category.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesCategory = selectedCategory === "All" || quiz.category.name === selectedCategory;
       const matchesDifficulty = selectedDifficulty === "All" || quiz.difficulty === selectedDifficulty;
@@ -84,6 +92,20 @@ export default function QuizSelectionPage() {
   const clearSearch = () => {
     setSearchTerm("");
   };
+
+  const filteredRooms = useMemo(() => {
+    return rooms.filter((room) => {
+      const term = roomSearchTerm.toLowerCase();
+      return (
+        room.title?.toLowerCase().includes(term) ||
+        room.quiz.title?.toLowerCase().includes(term)
+      );
+    });
+  }, [rooms, roomSearchTerm]);
+  
+  const clearRoomSearch=()=>{
+    setRoomSearchTerm("")
+  }
 
   const handleSelectQuiz = (quiz: QuizType) => {
     setSelectedQuiz(quiz);
@@ -204,7 +226,7 @@ export default function QuizSelectionPage() {
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
-            Choose your quiz to create a room and invite friends to join the challenge
+            Choose your quiz to create a room and invite students/friends to join the challenge
           </p>
         </div>
 
@@ -215,6 +237,7 @@ export default function QuizSelectionPage() {
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <Search className="w-5 h-5 text-gray-400" />
             </div>
+           {activeTab==="quiz"?<>
             <input
               type="text"
               placeholder="Search quizzes by title, description, or category..."
@@ -230,6 +253,21 @@ export default function QuizSelectionPage() {
                 <X className="w-5 h-5" />
               </button>
             )}
+           </>:<> <input
+              type="text"
+              placeholder="Search quizzes by title, description, or category..."
+              value={roomSearchTerm}
+              onChange={(e) => setRoomSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-12 py-3 sm:py-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all duration-300"
+            />
+            {searchTerm && (
+              <button
+                onClick={clearRoomSearch}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white transition-colors duration-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}</>}
           </div>
 
          
@@ -316,12 +354,12 @@ export default function QuizSelectionPage() {
                   : "text-gray-300 hover:text-white"
               }`}
             >
-              Rooms
+              Rooms ({rooms.length})
             </button>
           </div>
         </div>
 
-       
+       {/* TODO: RoomQuiz card shift there */}
         {activeTab === "quiz" && (
           <div className="pb-20">
             {filteredQuizzes.length === 0 ? (
@@ -404,15 +442,12 @@ export default function QuizSelectionPage() {
         )}
 
         {activeTab === "room" && (
-                <div className="text-center py-20">
-                    <div className="w-24 h-24 bg-gradient-to-r from-purple-600 to-pink-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Users className="w-12 h-12 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-4 text-gray-300">Room Management</h3>
-                    <p className="text-gray-400 mb-6">
-                    Room management features coming soon! Here you'll be able to view and manage your active quiz rooms.
-                    </p>
-                </div>
+          <RoomCard 
+            rooms={filteredRooms} 
+            onRoomDeleted={(roomId) => {
+              console.log("delete")
+            }} 
+          />
         )}
 
       </div>
@@ -516,7 +551,7 @@ export default function QuizSelectionPage() {
 
               <h3 className="text-xl sm:text-2xl font-bold mb-4">Room Created!</h3>
               <p className="text-gray-300 mb-6 text-sm sm:text-base">
-                Share this room ID with your friends to join the quiz:
+                Share this room ID with your students/friends to join the quiz:
               </p>
 
               <div className="bg-white/5 rounded-2xl p-4 mb-6">

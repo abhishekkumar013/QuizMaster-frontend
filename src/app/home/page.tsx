@@ -145,7 +145,7 @@ export default function QuizHomePage() {
                         href="/teacher/create-room"
                         className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
                       >
-                        <span className="font-semibold">Create Room</span>
+                        <span className="font-semibold">Room</span>
                       </Link>
                     </>
                   )}

@@ -14,10 +14,10 @@ export default function ClientLayout({
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    generateToken();
-    listenToMessages();
-  }, []);
+  // useEffect(() => {
+  //   generateToken();
+  //   listenToMessages();
+  // }, []);
 
   return (
     <Provider store={store}>
