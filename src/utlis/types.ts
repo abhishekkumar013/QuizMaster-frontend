@@ -159,21 +159,47 @@ export type UpdateQuestionType = {
   options: OptionType2[];
 };
 
-
-
-export interface RoomType{
+export interface RoomType {
   id: string;
   quizId: string;
   teacherId: string;
   roomCode: string;
   title: string;
-  startTime: string; 
-  endTime: string;   
+  startTime: string;
+  endTime: string;
   showReport: boolean;
-  createdAt: string; 
-  updatedAt: string; 
+  createdAt: string;
+  updatedAt: string;
   quiz: {
     title: string;
   };
   isActive: boolean;
-};
+}
+
+interface QuizEvaluation {
+  correctOptionId: string;
+  correctOptionText: string;
+  isCorrect: boolean;
+  marksAwarded: number;
+  questionId: string;
+  questionText: string;
+  selectedOptionId: string;
+  selectedOptionText: string;
+  skipped: boolean;
+  totalMarks: number;
+}
+
+export interface ResultType {
+  id: string;
+  isPassed: boolean;
+  percentage: number;
+  questionsAttempted: number;
+  questionsCorrect: number;
+  questionsIncorrect: number;
+  questionsSkipped: number;
+  score: number;
+  timeTaken: number;
+  totalMarks: number;
+  evaluation: QuizEvaluation[];
+  attemptNumber: number;
+}

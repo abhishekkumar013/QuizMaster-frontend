@@ -15,6 +15,7 @@ import { QuizCard } from "@/components/QuizCard";
 import { getUserInitial } from "@/lib/UserInitial";
 import BackButtonLogo from "@/components/BackButton-Logo";
 import { AppDispatch } from "@/store/slice";
+import JoinRoomDialog from "@/components/JoinRoomDialog";
 
 interface Category {
   id: string;
@@ -46,6 +47,7 @@ export default function QuizHomePage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState("ALL");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [activeTab, setActiveTab] = useState("public");
+  const [showCodeDialog, setShowCodeDialog] = useState(false);
 
   // console.log("user", user);
   useEffect(() => {
@@ -90,8 +92,8 @@ export default function QuizHomePage() {
   ];
   const categories = category;
 
-  console.log("Quiz ", allQuizzes);
-  console.log("cat", categories);
+  // console.log("Quiz ", allQuizzes);
+  // console.log("cat", categories);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
@@ -150,12 +152,20 @@ export default function QuizHomePage() {
                     </>
                   )}
                   {user.role === "STUDENT" && (
-                    <Link
-                      href="/student/reports"
-                      className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
-                    >
-                      <span className="font-semibold">All Report</span>
-                    </Link>
+                    <>
+                      <Link
+                        href="/student/reports"
+                        className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                      >
+                        <span className="font-semibold">All Report</span>
+                      </Link>
+                      <button
+                        onClick={() => setShowCodeDialog(true)}
+                        className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                      >
+                        <span className="font-semibold">Join Room</span>
+                      </button>
+                    </>
                   )}
                   <Link
                     href={`/update-profile/${user.id}`}
@@ -407,6 +417,10 @@ export default function QuizHomePage() {
               </p>
             </div>
           )}
+
+        {showCodeDialog && (
+          <JoinRoomDialog setShowCodeDialog={setShowCodeDialog} />
+        )}
       </div>
     </div>
   );

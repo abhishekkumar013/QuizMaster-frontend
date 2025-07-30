@@ -23,6 +23,8 @@ import io from "socket.io-client";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Loading from "@/components/Loading";
+import QuizResult from "@/components/QuizResult";
+import { ResultType } from "@/utlis/types";
 
 let socket = null;
 
@@ -44,10 +46,10 @@ const QuizTakingComponent = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Added missing state
-  const [results, setResults] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [results, setResults] = useState<ResultType>(null);
   const [showReport, setShowReport] = useState(false);
-  const [startingQuiz, setStartingQuiz] = useState(false); // Added new state
+  const [startingQuiz, setStartingQuiz] = useState(false);
   const timerRef = useRef(null);
 
   const initializeSocket = () => {
@@ -102,10 +104,8 @@ const QuizTakingComponent = () => {
   }, [quizId]);
 
   useEffect(() => {
-    // Initialize socket when component mounts
     const currentSocket = initializeSocket();
 
-    // Set up socket event listeners
     const handleQuizStarted = ({ sessionId }) => {
       console.log("Quiz started with session:", sessionId);
       setSessionId(sessionId);
@@ -115,7 +115,7 @@ const QuizTakingComponent = () => {
     };
 
     const handleAnswerSaved = (data) => {
-      console.log("Answer saved:", data);
+      // console.log("Answer saved:", data);
     };
 
     const handleQuizSubmitted = (data) => {
@@ -139,14 +139,12 @@ const QuizTakingComponent = () => {
       setIsSubmitting(false);
     };
 
-    // Add event listeners
     currentSocket.on("quiz-started", handleQuizStarted);
     currentSocket.on("answer-saved", handleAnswerSaved);
     currentSocket.on("quiz-submitted", handleQuizSubmitted);
     currentSocket.on("quiz-completed", handleQuizCompleted);
     currentSocket.on("error", handleError);
 
-    // Cleanup function
     return () => {
       currentSocket.off("quiz-started", handleQuizStarted);
       currentSocket.off("answer-saved", handleAnswerSaved);
@@ -158,7 +156,6 @@ const QuizTakingComponent = () => {
         clearInterval(timerRef.current);
       }
 
-      // Don't disconnect socket here - let it disconnect naturally
       // currentSocket.disconnect();
     };
   }, [quizId]);
@@ -306,174 +303,11 @@ const QuizTakingComponent = () => {
   // Quiz Results Screen
   if (quizCompleted && results) {
     return (
-      <>
-        <HeaderBar />
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
-          <div className="max-w-4xl mt-14 mx-auto">
-            {!showReport ? (
-              <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20">
-                <div className="text-center mb-8">
-                  <div
-                    className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 ${
-                      results.isPassed
-                        ? "bg-gradient-to-r from-green-400 to-emerald-500"
-                        : "bg-gradient-to-r from-orange-400 to-red-500"
-                    }`}
-                  >
-                    {results.isPassed ? (
-                      <Award className="w-10 h-10 text-white" />
-                    ) : (
-                      <RotateCcw className="w-10 h-10 text-white" />
-                    )}
-                  </div>
-
-                  <h1 className="text-3xl font-bold text-white mb-2">
-                    {results.isPassed ? "Congratulations!" : "Keep Learning!"}
-                  </h1>
-                  <p className="text-gray-300 mb-6">
-                    {results.isPassed
-                      ? "You have successfully completed the quiz"
-                      : "You can retake the quiz to improve your score"}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  <div className="bg-white/5 rounded-2xl p-4 text-center">
-                    <TrendingUp className="w-6 h-6 text-cyan-400 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-white">
-                      {results.score}
-                    </div>
-                    <div className="text-sm text-gray-300">Score</div>
-                  </div>
-
-                  <div className="bg-white/5 rounded-2xl p-4 text-center">
-                    <Target className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-white">
-                      {results.percentage}%
-                    </div>
-                    <div className="text-sm text-gray-300">Percentage</div>
-                  </div>
-
-                  <div className="bg-white/5 rounded-2xl p-4 text-center">
-                    <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-white">
-                      {results.questionsCorrect}
-                    </div>
-                    <div className="text-sm text-gray-300">Correct</div>
-                  </div>
-
-                  <div className="bg-white/5 rounded-2xl p-4 text-center">
-                    <XCircle className="w-6 h-6 text-red-400 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-white">
-                      {results.questionsIncorrect}
-                    </div>
-                    <div className="text-sm text-gray-300">Incorrect</div>
-                  </div>
-                </div>
-
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={() => setShowReport(true)}
-                    className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-2xl font-semibold hover:from-cyan-600 hover:to-blue-700 transition-all duration-300"
-                  >
-                    View Detailed Report
-                  </button>
-                  <button
-                    onClick={() => router.push("/home")}
-                    className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-semibold hover:from-gray-600 hover:to-gray-700 transition-all duration-300"
-                  >
-                    Back to Home
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-white">
-                    Detailed Report
-                  </h2>
-                  <button
-                    onClick={() => setShowReport(false)}
-                    className="px-4 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors"
-                  >
-                    Back to Summary
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  {results.evaluation?.map((item, index) => (
-                    <div
-                      key={item.questionId}
-                      className="bg-white/5 rounded-2xl p-6"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-white">
-                          Q{index + 1}. {item.questionText}
-                        </h3>
-                        <div
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            item.skipped
-                              ? "bg-yellow-500/20 text-yellow-400"
-                              : item.isCorrect
-                              ? "bg-green-500/20 text-green-400"
-                              : "bg-red-500/20 text-red-400"
-                          }`}
-                        >
-                          {item.skipped
-                            ? "Skipped"
-                            : item.isCorrect
-                            ? "Correct"
-                            : "Incorrect"}
-                        </div>
-                      </div>
-
-                      {!item.skipped && (
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <span className="text-gray-400 mr-2">
-                              Your Answer:
-                            </span>
-                            <span
-                              className={`${
-                                item.isCorrect
-                                  ? "text-green-400"
-                                  : "text-red-400"
-                              }`}
-                            >
-                              {item.selectedOptionText}
-                            </span>
-                          </div>
-                          {!item.isCorrect && (
-                            <div className="flex items-center">
-                              <span className="text-gray-400 mr-2">
-                                Correct Answer:
-                              </span>
-                              <span className="text-green-400">
-                                {item.correctOptionText}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {item.skipped && (
-                        <div className="flex items-center">
-                          <span className="text-gray-400 mr-2">
-                            Correct Answer:
-                          </span>
-                          <span className="text-green-400">
-                            {item.correctOptionText}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </>
+      <QuizResult
+        showReport={showReport}
+        results={results}
+        setShowReport={setShowReport}
+      />
     );
   }
 
