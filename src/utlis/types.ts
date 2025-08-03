@@ -205,7 +205,7 @@ export interface ResultType {
 }
 
 export interface RoomStatsDataType {
-  studentsJoined: string;
-  highestScore: string;
-  totalSubmissions: string;
+  studentsJoined: number;
+  highestScore: number;
+  totalSubmissions: number;
 }
