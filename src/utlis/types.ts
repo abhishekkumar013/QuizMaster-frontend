@@ -203,3 +203,9 @@ export interface ResultType {
   evaluation: QuizEvaluation[];
   attemptNumber: number;
 }
+
+export interface RoomStatsDataType {
+  studentsJoined: string;
+  highestScore: string;
+  totalSubmissions: string;
+}

@@ -72,25 +72,28 @@ const JoinRoomDialog = ({
         socket!.emit("join-room", joinData);
       });
 
-      socket.on("quiz-started", ({ sessionId, roomId, quizId }) => {
-        // console.log("Quiz started received:", { sessionId, roomId });
-        toast.success("Successfully joined the room!");
+      socket.on(
+        "quiz-started",
+        ({ sessionId, roomId, quizId, roomStatsData }) => {
+          // console.log("Quiz started received:", { sessionId, roomId });
+          toast.success("Successfully joined the room!");
 
-        localStorage.setItem("currentSessionId", sessionId);
-        localStorage.setItem("currentRoomId", roomId);
-        localStorage.setItem("currentQuizId", quizId);
+          localStorage.setItem("currentSessionId", sessionId);
+          localStorage.setItem("currentRoomId", roomId);
+          localStorage.setItem("currentQuizId", quizId);
 
-        setShowCodeDialog(false);
+          setShowCodeDialog(false);
 
-        if (sessionId && roomId && quizId) {
-          router.push(
-            `/student/room/quiz?roomId=${roomId}&sessionId=${sessionId}&quizId=${quizId}`
-          );
+          if (sessionId && roomId && quizId) {
+            router.push(
+              `/student/room/quiz?roomId=${roomId}&sessionId=${sessionId}&quizId=${quizId}&studentsJoined=${roomStatsData.studentsJoined}&highestScore=${roomStatsData.highestScore}&totalSubmissions=${roomStatsData.totalSubmissions}`
+            );
+          }
+
+          setIsJoining(false);
+          socket?.disconnect();
         }
-
-        setIsJoining(false);
-        socket?.disconnect();
-      });
+      );
 
       socket.on("error", ({ message }) => {
         toast.error(

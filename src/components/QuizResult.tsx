@@ -9,6 +9,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { ResultType } from "@/utlis/types";
+import { useRouter } from "next/navigation";
 
 const QuizResult = ({
   showReport,
@@ -19,6 +20,8 @@ const QuizResult = ({
   results: ResultType;
   setShowReport: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  const router = useRouter();
+
   return (
     <>
       <HeaderBar />

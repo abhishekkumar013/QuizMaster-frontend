@@ -8,12 +8,15 @@ import {
   ArrowLeft,
   ArrowRight,
   Send,
+  Users,
+  Trophy,
+  Target,
 } from "lucide-react";
 import { io, Socket } from "socket.io-client";
-import axiosInstance from "@/lib/axios";
+import axios from "@/lib/axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { QuizType } from "@/utlis/Quiz-Types";
-import { ResultType } from "@/utlis/types";
+import { ResultType, RoomStatsDataType } from "@/utlis/types";
 import { toast } from "react-toastify";
 import QuizResult from "@/components/QuizResult";
 
@@ -33,25 +36,55 @@ const RoomQuizPage = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
 
   const searchParams = useSearchParams();
-  const quizId = searchParams.get("quizId");
+  const roomIdParms = searchParams.get("roomId");
+  const studentsJoined = searchParams.get("studentsJoined");
+  const highestScore = searchParams.get("highestScore");
+  const totalSubmissions = searchParams.get("totalSubmissions");
+
+  useEffect(() => {
+    setRoomId(roomIdParms);
+    setRoomStats({
+      studentsJoined,
+      highestScore,
+      totalSubmissions,
+    });
+  }, []);
+
+  const [roomStats, setRoomStats] = useState({
+    studentsJoined: 0,
+    highestScore: 0,
+    totalSubmissions: 0,
+  });
 
   const router = useRouter();
 
   const fetchQuiz = async () => {
     try {
-      const res = await axiosInstance.get(`/quiz/id/${quizId}`);
+      const res = await axios.get(`/quiz/room/${roomId}`);
       // console.log("Quiz data fetched:", res.data);
       if (res.data.success) {
         setQuizData(res.data.data);
       }
     } catch (error) {
-      console.error("Error fetching quiz:", error);
+      // console.error("Error fetching quiz:", error);
       toast.error("Failed to load quiz data");
     }
   };
 
+  const handleRoomStatsUpdated = useCallback(
+    (data: {
+      studentsJoined: number;
+      highestScore: number;
+      totalSubmissions: number;
+    }) => {
+      // console.log("Room stats updated:", data);
+      setRoomStats(data);
+    },
+    []
+  );
+
   useEffect(() => {
-    if (!quizId) return;
+    if (!roomId) return;
 
     const urlParams = new URLSearchParams(window.location.search);
     const roomIdFromUrl = urlParams.get("roomId");
@@ -99,7 +132,7 @@ const RoomQuizPage = () => {
     });
 
     socketConnection.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
+      // console.error("Socket connection error:", error);
       setConnectionError("Failed to connect to server");
       setIsConnecting(false);
     });
@@ -107,7 +140,7 @@ const RoomQuizPage = () => {
     return () => {
       socketConnection?.disconnect();
     };
-  }, [quizId]);
+  }, [roomId]);
 
   useEffect(() => {
     if (!socket) return;
@@ -116,8 +149,9 @@ const RoomQuizPage = () => {
       sessionId: string;
       roomId?: string;
       quizId?: string;
+      roomStatsData: RoomStatsDataType;
     }) => {
-      console.log("Quiz started:", data);
+      console.log("HHHH", data);
       setSessionId(data.sessionId);
       if (data.roomId) setRoomId(data.roomId);
 
@@ -125,6 +159,7 @@ const RoomQuizPage = () => {
       if (data.roomId) {
         localStorage.setItem("currentRoomId", data.roomId);
       }
+      setRoomStats(data.roomStatsData);
     };
 
     const handleSessionRestored = (data: {
@@ -132,14 +167,11 @@ const RoomQuizPage = () => {
       roomId?: string;
       quizId?: string;
     }) => {
-      // console.log("Session restored:", data);
       setSessionId(data.sessionId);
       if (data.roomId) setRoomId(data.roomId);
-      toast.success("Session restored successfully");
     };
 
     const handleQuizSubmitted = (data: any) => {
-      // console.log("Quiz submitted:", data);
       if (data.success) {
         setResults(data.result);
         setQuizCompleted(true);
@@ -167,11 +199,13 @@ const RoomQuizPage = () => {
       }
     };
 
+    // Set up all event listeners
     socket.on("quiz-started", handleQuizStarted);
     socket.on("session-restored", handleSessionRestored);
     socket.on("quiz-submitted", handleQuizSubmitted);
     socket.on("answer-saved", handleAnswerSaved);
     socket.on("error", handleError);
+    socket.on("room-stats-updated", handleRoomStatsUpdated);
 
     return () => {
       socket.off("quiz-started", handleQuizStarted);
@@ -179,8 +213,9 @@ const RoomQuizPage = () => {
       socket.off("quiz-submitted", handleQuizSubmitted);
       socket.off("answer-saved", handleAnswerSaved);
       socket.off("error", handleError);
+      socket.off("room-stats-updated", handleRoomStatsUpdated);
     };
-  }, [socket]);
+  }, [socket, handleRoomStatsUpdated, router]);
 
   useEffect(() => {
     if (timeRemaining > 0 && !isSubmitting && sessionId) {
@@ -225,10 +260,7 @@ const RoomQuizPage = () => {
         optionId,
       });
     } else {
-      console.warn("Cannot save answer - missing socket or sessionId:", {
-        socket: !!socket,
-        sessionId,
-      });
+      toast.error("Cannot save answer");
     }
   };
 
@@ -313,37 +345,75 @@ const RoomQuizPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-6 border border-white/20">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-2">
-                {quizData.title}
-              </h1>
-              <p className="text-white/70">Room Quiz Session</p>
+          <div className="flex flex-col gap-4">
+            {/* Title and Room Info */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-white mb-2">
+                  {quizData.title}
+                </h1>
+                <p className="text-white/70">Room Quiz Session</p>
+              </div>
+
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 text-white">
+                  <Clock className="w-5 h-5" />
+                  <span className="font-mono text-lg">
+                    {formatTime(timeRemaining)}
+                  </span>
+                </div>
+
+                <div className="text-white">
+                  <span className="text-sm opacity-70">Progress: </span>
+                  <span className="font-semibold">
+                    {answeredCount}/{totalQuestions}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleSubmitQuiz}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl font-semibold text-white transition-all duration-300 disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" />
+                  {isSubmitting ? "Submitting..." : "Submit Quiz"}
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 text-white">
-                <Clock className="w-5 h-5" />
-                <span className="font-mono text-lg">
-                  {formatTime(timeRemaining)}
+            {/* Room Statistics */}
+            <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/20">
+              <div className="flex items-center gap-2 text-white/90">
+                <Users className="w-5 h-5 text-blue-400" />
+                <span className="text-sm font-medium">Students Joined:</span>
+                <span className="font-bold text-blue-400">
+                  {roomStats.studentsJoined}
                 </span>
               </div>
 
-              <div className="text-white">
-                <span className="text-sm opacity-70">Progress: </span>
-                <span className="font-semibold">
-                  {answeredCount}/{totalQuestions}
+              <div className="flex items-center gap-2 text-white/90">
+                <Trophy className="w-5 h-5 text-yellow-400" />
+                <span className="text-sm font-medium">Highest Score:</span>
+                <span className="font-bold text-yellow-400">
+                  {roomStats.highestScore > 0 ? roomStats.highestScore : "N/A"}
                 </span>
               </div>
 
-              <button
-                onClick={handleSubmitQuiz}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl font-semibold text-white transition-all duration-300 disabled:opacity-50"
-              >
-                <Send className="w-4 h-4" />
-                {isSubmitting ? "Submitting..." : "Submit Quiz"}
-              </button>
+              <div className="flex items-center gap-2 text-white/90">
+                <Target className="w-5 h-5 text-green-400" />
+                <span className="text-sm font-medium">Submissions:</span>
+                <span className="font-bold text-green-400">
+                  {roomStats.totalSubmissions}
+                </span>
+              </div>
+
+              {roomStats.totalSubmissions > 0 && (
+                <div className="ml-auto px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-400/30">
+                  <span className="text-sm text-purple-200 font-medium">
+                    🔥 Live Competition Active!
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
