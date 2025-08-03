@@ -44,9 +44,9 @@ const RoomQuizPage = () => {
   useEffect(() => {
     setRoomId(roomIdParms);
     setRoomStats({
-      studentsJoined,
-      highestScore,
-      totalSubmissions,
+      studentsJoined: Number(studentsJoined) || 0,
+      highestScore: Number(highestScore) || 0,
+      totalSubmissions: Number(totalSubmissions) || 0,
     });
   }, []);
 
