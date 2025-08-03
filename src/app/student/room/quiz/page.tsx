@@ -61,12 +61,11 @@ const RoomQuizPage = () => {
   const fetchQuiz = async () => {
     try {
       const res = await axios.get(`/quiz/room/${roomId}`);
-      // console.log("Quiz data fetched:", res.data);
+
       if (res.data.success) {
         setQuizData(res.data.data);
       }
     } catch (error) {
-      // console.error("Error fetching quiz:", error);
       toast.error("Failed to load quiz data");
     }
   };
@@ -77,7 +76,6 @@ const RoomQuizPage = () => {
       highestScore: number;
       totalSubmissions: number;
     }) => {
-      // console.log("Room stats updated:", data);
       setRoomStats(data);
     },
     []
